@@ -201,6 +201,7 @@ public class RAMSearchIndex<R extends IndexReader> extends BaseSearchIndex<R>
   
   private final Object readerOpenLock = new Object();
   
+  @Override
   public ZoieIndexReader<R> openIndexReader(String minVersion,long timeout) throws IOException,TimeoutException{
     
     if (timeout<0) timeout = Long.MAX_VALUE;

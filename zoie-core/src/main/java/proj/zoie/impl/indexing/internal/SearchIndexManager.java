@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
@@ -57,9 +58,9 @@ public class SearchIndexManager<R extends IndexReader> implements IndexReaderFac
 	  private final Object _memLock = new Object();
 	  private final RAMIndexFactory<R> _ramIndexFactory;
 	  
-	  private volatile String _memAVersion = null;
-	  private volatile String _memBVersion = null;
-	  private volatile String _diskVersion = null;
+	 // private volatile String _memAVersion = null;
+	 // private volatile String _memBVersion = null;
+	  //private volatile String _diskVersion = null;
 	  
 	  private final Comparator<String> _versionComparator;
 	  
@@ -216,6 +217,69 @@ public class SearchIndexManager<R extends IndexReader> implements IndexReaderFac
 	    return _diskIndexerStatus;
 	  }
 	  
+
+    private static <R extends IndexReader> void prepareReader(List<ZoieIndexReader<R>> readerList,ZoieIndexReader<R> srcReader) throws IOException{
+      ZoieIndexReader<R> reader = null;
+      if (srcReader != null)
+      {
+        reader = srcReader.copy();
+        reader.setDelDocIds();
+        readerList.add(reader);
+      }
+    }
+	  
+	  public List<ZoieIndexReader<R>> getIndexReaders(String minVersion,long timeout)
+	      throws IOException,TimeoutException{
+	    ArrayList<ZoieIndexReader<R>> readers = new ArrayList<ZoieIndexReader<R>>();
+	    ArrayList<BaseSearchIndex<R>> olderIndexes = new ArrayList<BaseSearchIndex<R>>();
+	    BaseSearchIndex<R> idx = null;
+      String version = null;
+      synchronized(this)
+      {
+        synchronized(_memLock)
+        {
+          idx = _mem.get_memIndexA();
+          version = idx.getVersion();
+          
+          RAMSearchIndex<R> memIndexB = _mem.get_memIndexB();
+          String memBVersion= memIndexB.getVersion();
+          
+          // B is newer than A
+          if (_versionComparator.compare(version, memBVersion)<0){
+            version = memBVersion;
+            olderIndexes.add(idx);
+            idx = memIndexB;
+          }
+          // A is newer than B
+          else{
+            olderIndexes.add(memIndexB);
+          }
+          
+          String diskVersion = _diskIndex.getVersion();
+          if (_versionComparator.compare(version, diskVersion) < 0){
+            version = diskVersion;
+            olderIndexes.add(idx);
+            idx = _diskIndex;
+          }
+          else{
+            olderIndexes.add(_diskIndex);
+          }
+          
+          ZoieIndexReader<R> reader = idx.openIndexReader(minVersion, timeout);
+          prepareReader(readers, reader);
+          
+          for (BaseSearchIndex<R> olderIdx : olderIndexes){
+            reader = olderIdx.openIndexReader();
+            prepareReader(readers, reader);
+          }
+        }
+      }
+      
+      return readers;
+	    
+	  }
+	  
+	  
 	  public List<ZoieIndexReader<R>> getIndexReaders()
 	  throws IOException
 	  {
@@ -233,20 +297,13 @@ public class SearchIndexManager<R extends IndexReader> implements IndexReaderFac
 	        // the following order, e.g. B,A,Disk matters, see ZoieIndexReader.getSubZoieReaderAccessor:
 	        // when doing UID->docid mapping, the freshest index needs to be first
 
-	        String currentVersion = null;
 	        if (memIndexB != null)                           // load memory index B
 	        {
             synchronized(memIndexB)
             {
               reader = memIndexB.openIndexReader();
-              if (reader != null)
-              {
-                reader = reader.copy();
-                reader.setDelDocIds();
-                readers.add(reader);
-              }
+              prepareReader(readers,reader);
             }
-            _memBVersion = memIndexB.getVersion();
 	        }
 
 	        if (memIndexA != null)                           // load memory index A
@@ -254,27 +311,14 @@ public class SearchIndexManager<R extends IndexReader> implements IndexReaderFac
             synchronized(memIndexA)
             {
               reader = memIndexA.openIndexReader();
-              if (reader != null)
-              {
-                reader = reader.copy();
-                reader.setDelDocIds();
-                readers.add(reader);
-              }
+              prepareReader(readers,reader);
             }
-	          _memAVersion = memIndexA.getVersion();
 	        }
 
 	        // load disk index
 	        {
 	          reader = mem.get_diskIndexReader();
-	          if (reader != null)
-	          {
-              reader = reader.copy();
-	            reader.setDelDocIds();
-	            readers.add(reader);
-	          }
-	          
-	          _diskVersion = getCurrentDiskVersion();
+            prepareReader(readers,reader);
 	        }
 	      }
 	    }
@@ -285,12 +329,14 @@ public class SearchIndexManager<R extends IndexReader> implements IndexReaderFac
 
 	@Override
 	public String getCurrentReaderVersion() {
-	  String version = _memAVersion;
-	  if (_versionComparator.compare(version, _memBVersion)<0){
-		  version = _memBVersion;
+	  String version = _mem.get_memIndexA().getVersion();
+    String versionB = _mem.get_memIndexB().getVersion();
+    String versionD = getCurrentDiskVersion();
+	  if (_versionComparator.compare(version, versionB)<0){
+		  version = versionB;
 	  }
-	  if (_versionComparator.compare(version, _diskVersion) < 0){
-		  version = _diskVersion;
+	  if (_versionComparator.compare(version, versionD) < 0){
+		  version = versionD;
 	  }
 	  return version;
 	  
@@ -404,7 +450,7 @@ public class SearchIndexManager<R extends IndexReader> implements IndexReaderFac
 	  }
 
 	  
-	  public String getCurrentDiskVersion() throws IOException
+	  public String getCurrentDiskVersion()
 	  {
 	    return _diskIndex.getVersion();
 	  }

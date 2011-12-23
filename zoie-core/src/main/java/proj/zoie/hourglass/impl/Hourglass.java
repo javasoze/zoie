@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -118,6 +119,7 @@ public class Hourglass<R extends IndexReader, D> implements Zoie<R, D>
    * @see proj.zoie.hourglass.impl.Hourglass#returnIndexReaders(List)
    * @see proj.zoie.api.IndexReaderFactory#getIndexReaders()
    */
+  @Override
   public List<ZoieIndexReader<R>> getIndexReaders() throws IOException
   {
     long t0 = System.currentTimeMillis();
@@ -158,6 +160,7 @@ public class Hourglass<R extends IndexReader, D> implements Zoie<R, D>
       _shutdownLock.readLock().unlock();
     }
   }
+ 
   /**
    * not thread safe. should be properly lock. Right now we have two places to use it
    * and locked by the shutdown lock. If it gets more complicated, we should use separate

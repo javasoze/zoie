@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.management.NotCompliantMBeanException;
@@ -686,6 +687,7 @@ public boolean alreadyShutdown()
    * reference counting correctly.
    * @see proj.zoie.api.IndexReaderFactory#getIndexReaders()
    */
+  @Override
   public List<ZoieIndexReader<R>> getIndexReaders() throws IOException
   {
     long t0 = System.currentTimeMillis();
@@ -697,6 +699,7 @@ public boolean alreadyShutdown()
     }
     return readers;
   }
+
 
   public int getDiskSegmentCount() throws IOException
   {

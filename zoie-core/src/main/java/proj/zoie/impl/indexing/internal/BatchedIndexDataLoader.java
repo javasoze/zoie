@@ -290,14 +290,8 @@ public class BatchedIndexDataLoader<R extends IndexReader,D> implements LifeCycl
         long now=System.currentTimeMillis();
         long duration=now-_lastFlushTime;
 
-        String currentVersion;
+        String currentVersion = _idxMgr.getCurrentDiskVersion();
 	      
-	    try{
-	      currentVersion = _idxMgr.getCurrentDiskVersion();
-	    }
-	    catch(IOException ioe){
-	      currentVersion = null;
-	    }
 	    
         synchronized(this)
         {
@@ -350,14 +344,9 @@ public class BatchedIndexDataLoader<R extends IndexReader,D> implements LifeCycl
              
               IndexUpdatedEvent evt = new IndexUpdatedEvent(eventCount,t1,t2,_eventCount);
               fireIndexingEvent(evt);
-              try{
-                String newVersion = _idxMgr.getCurrentDiskVersion();
-                if (currentVersion==null || !currentVersion.equals(newVersion)){
-                	fireNewVersionEvent(newVersion);
-                }
-              }
-              catch(IOException ioe){
-            	 log.error(ioe.getMessage(),ioe); 
+              String newVersion = _idxMgr.getCurrentDiskVersion();
+              if (currentVersion==null || !currentVersion.equals(newVersion)){
+              	fireNewVersionEvent(newVersion);
               }
             }
           }

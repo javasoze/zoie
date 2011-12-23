@@ -17,6 +17,7 @@ package proj.zoie.api;
  */
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.IndexReader;
@@ -33,6 +34,16 @@ public interface IndexReaderFactory<R extends IndexReader>
 	 * @throws IOException
 	 */
 	List<R> getIndexReaders() throws IOException;
+	
+
+  /**
+   * Returns a list of index readers with at least a version.
+   * @param minVersion minimum version of the readers to be returned
+   * @param timeout Timemout value
+   * @return List of IndexReader instances 
+   * @throws IOException,TimeoutException
+   */
+  //List<R> getIndexReaders(String minVersion,long timeout) throws IOException,TimeoutException;
 	
 	/**
 	 * Gets the default analyzer used for indexing.

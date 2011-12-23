@@ -24,6 +24,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
@@ -85,6 +86,8 @@ public abstract class BaseSearchIndex<R extends IndexReader> {
 	  }
 	  
     abstract public ZoieIndexReader<R> openIndexReader() throws IOException;
+
+    abstract public ZoieIndexReader<R> openIndexReader(String minVersion,long timeout) throws IOException,TimeoutException;
 	  
 	  abstract protected IndexReader openIndexReaderForDelete() throws IOException;
 	  

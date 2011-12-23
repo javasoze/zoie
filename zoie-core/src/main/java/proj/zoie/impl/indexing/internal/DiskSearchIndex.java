@@ -212,6 +212,7 @@ public class DiskSearchIndex<R extends IndexReader> extends BaseSearchIndex<R>{
   
   private final Object readerOpenLock = new Object();
   
+  @Override
   public ZoieIndexReader<R> openIndexReader(String minVersion,long timeout) throws IOException,TimeoutException{
     if (_versionComparator.compare(minVersion,_dispenser.getCurrentVersion())<=0){
       return _dispenser.getIndexReader();
