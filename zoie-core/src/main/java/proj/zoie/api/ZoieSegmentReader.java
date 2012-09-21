@@ -30,11 +30,9 @@ import org.apache.lucene.analysis.tokenattributes.PayloadAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.Payload;
 import org.apache.lucene.index.SegmentReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermDocs;
-import org.apache.lucene.index.TermPositions;
+import org.apache.lucene.util.BytesRef;
 
 import proj.zoie.api.impl.util.ArrayDocIdSet;
 import proj.zoie.api.indexing.AbstractZoieIndexable;
@@ -66,7 +64,7 @@ public class ZoieSegmentReader<R extends IndexReader> extends ZoieIndexReader<R>
           buffer[6] = (byte) (uid >> 48);
           buffer[7] = (byte) (uid >> 56);
           payloadAttr = addAttribute(PayloadAttribute.class);
-          payloadAttr.setPayload(new Payload(buffer));
+          payloadAttr.setPayload(new BytesRef(buffer));
           termAttr = addAttribute(CharTermAttribute.class);
           termAttr.append(termVal);
           returnToken = true;

@@ -25,7 +25,7 @@ public class ZoieSolrIndexCommit extends IndexCommit {
     final int segmentCount;
 
     ZoieSolrIndexCommit(SegmentInfos infos, Directory dir) throws IOException {
-      segmentsFileName = infos.getCurrentSegmentFileName();
+      segmentsFileName = infos.getSegmentsFileName();
       this.dir = dir;
       userData = infos.getUserData();
       files = Collections.unmodifiableCollection(infos.files(dir, true));

@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,19 +19,14 @@ import java.util.Random;
 import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.Fieldable;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.MultiReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Filter;
@@ -38,7 +34,6 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.util.Version;
@@ -427,11 +422,11 @@ public class ZoieTest extends ZoieTestCaseBase {
 	    MultiReader reader = new MultiReader(readerList.toArray(new IndexReader[readerList.size()]),false);
 	    // do search
 	    IndexSearcher searcher = new IndexSearcher(reader);
-	    QueryParser parser = new QueryParser(Version.LUCENE_35, "num", new StandardAnalyzer(Version.LUCENE_35));
+	    QueryParser parser = new QueryParser(Version.LUCENE_40, "num", new StandardAnalyzer(Version.LUCENE_40));
 	    Query q = parser.parse("num:abc*");
 	    TopDocs ret = searcher.search(q, 100);
 	    TestCase.assertEquals(3, ret.totalHits);
-	    searcher.close();
+	    
 	  
 	    zoie.returnIndexReaders((List) readerList);
 		
@@ -448,7 +443,7 @@ public class ZoieTest extends ZoieTestCaseBase {
 		// do search
 	    searcher = new IndexSearcher(reader);
 	    ret = searcher.search(q, 100);
-	    searcher.close();
+	    
 	    TestCase.assertEquals(0, ret.totalHits);
 	    zoie.returnIndexReaders((List)readerList);
 	  } 
@@ -498,7 +493,6 @@ public class ZoieTest extends ZoieTestCaseBase {
 
       int numDocs = searcher.search(new MatchAllDocsQuery(), 10).totalHits;
 
-      searcher.close();
       log.info("numdocs: "+numDocs);
       TestCase.assertTrue(numDocs>0);
 
@@ -518,7 +512,6 @@ public class ZoieTest extends ZoieTestCaseBase {
 
       numDocs = searcher.search(new MatchAllDocsQuery(), 10).totalHits;
 
-      searcher.close();
 
       numDocs = multiReader.numDocs();
 

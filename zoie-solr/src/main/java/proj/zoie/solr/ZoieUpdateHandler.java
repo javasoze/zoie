@@ -18,7 +18,9 @@ import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
+import org.apache.lucene.util.BytesRef;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.core.SolrCore;
@@ -35,7 +37,6 @@ import proj.zoie.api.DocIDMapper;
 import proj.zoie.api.Zoie;
 import proj.zoie.api.ZoieException;
 import proj.zoie.api.ZoieIndexReader;
-import proj.zoie.impl.indexing.ZoieSystem;
 
 public class ZoieUpdateHandler extends UpdateHandler {
 	private static Logger log = Logger.getLogger(ZoieUpdateHandler.class);
@@ -49,7 +50,7 @@ public class ZoieUpdateHandler extends UpdateHandler {
 
 	@Override
 	public int addDoc(AddUpdateCommand cmd) throws IOException {
-		String id = cmd.getIndexedId(_core.getSchema());
+		BytesRef id = cmd.getIndexedId();
 		
 		long zoieUid;
 		try{
@@ -59,7 +60,8 @@ public class ZoieUpdateHandler extends UpdateHandler {
 			throw new IOException("index uid must exist and of type long: "+id);
 		}
 		
-		Document doc = cmd.doc;
+		//Document doc = cmd.doc;
+		SolrInputDocument inputDoc = cmd.solrDoc;
 		
 		ZoieSystemHome zoieHome = ZoieSystemHome.getInstance(_core);
 		if (zoieHome==null){

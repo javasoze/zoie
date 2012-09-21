@@ -34,9 +34,9 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.DefaultSimilarity;
 import org.apache.lucene.search.Filter;
-import org.apache.lucene.search.Similarity;
+import org.apache.lucene.search.similarities.DefaultSimilarity;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.util.Version;
 
 import proj.zoie.api.DefaultDirectoryManager;
@@ -55,7 +55,6 @@ import proj.zoie.api.indexing.IndexReaderDecorator;
 import proj.zoie.api.indexing.IndexingEventListener;
 import proj.zoie.api.indexing.OptimizeScheduler;
 import proj.zoie.api.indexing.ZoieIndexable;
-import proj.zoie.api.indexing.ZoieIndexable.IndexingReq;
 import proj.zoie.api.indexing.ZoieIndexableInterpreter;
 import proj.zoie.impl.indexing.internal.BatchedIndexDataLoader;
 import proj.zoie.impl.indexing.internal.DefaultRAMIndexFactory;
@@ -493,7 +492,7 @@ extends AsyncDataConsumer<D> implements Zoie<R, D>
   public static <D> ZoieSystem<IndexReader, D> buildDefaultInstance(File idxDir, ZoieIndexableInterpreter<D> interpreter,
       int batchSize, long batchDelay, boolean realtime, Comparator<String> versionComparator)
   {
-    return buildDefaultInstance(idxDir, interpreter, new StandardAnalyzer(Version.LUCENE_34), new DefaultSimilarity(), batchSize, batchDelay, realtime, versionComparator);
+    return buildDefaultInstance(idxDir, interpreter, new StandardAnalyzer(Version.LUCENE_40), new DefaultSimilarity(), batchSize, batchDelay, realtime, versionComparator);
   }
 
   /**

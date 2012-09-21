@@ -2,20 +2,19 @@ package proj.zoie.impl.indexing.internal;
 
 import java.io.IOException;
 
-import org.apache.lucene.index.FilterIndexReader.FilterTermDocs;
+import org.apache.lucene.index.DocsEnum;
+import org.apache.lucene.index.FilterAtomicReader.FilterDocsEnum;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermDocs;
-import org.apache.lucene.index.TermEnum;
 import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.DocIdSetIterator;
 
-public class ZoieSegmentTermDocs extends FilterTermDocs {
+public class ZoieSegmentTermDocs extends FilterDocsEnum {
 	private final DocIdSet delSet;
 	private int _firstDelDoc = -1;
 	private DocIdSetIterator _delSetIterator;
     private int _nextDelDoc;
     
-	public ZoieSegmentTermDocs(TermDocs in,DocIdSet delSet) throws IOException{
+	public ZoieSegmentTermDocs(DocsEnum in,DocIdSet delSet) throws IOException{
 		super(in);
 		this.delSet = delSet;
 		resetDelIter();
@@ -27,18 +26,6 @@ public class ZoieSegmentTermDocs extends FilterTermDocs {
 			_delSetIterator = delSet.iterator();
 			_nextDelDoc = _delSetIterator.nextDoc();
 		}
-	}
-	
-	@Override
-	public void seek(Term term) throws IOException {
-		resetDelIter();
-		super.seek(term);
-	}
-
-	@Override
-	public void seek(TermEnum termEnum) throws IOException {
-		resetDelIter();
-		super.seek(termEnum);
 	}
 
 	public boolean next() throws IOException {

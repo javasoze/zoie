@@ -21,7 +21,6 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
@@ -31,7 +30,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.SerialMergeScheduler;
-import org.apache.lucene.search.Similarity;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.Version;
 

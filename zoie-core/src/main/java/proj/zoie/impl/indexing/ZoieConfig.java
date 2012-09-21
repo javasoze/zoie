@@ -6,8 +6,8 @@ import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.search.DefaultSimilarity;
-import org.apache.lucene.search.Similarity;
+import org.apache.lucene.search.similarities.DefaultSimilarity;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.util.Version;
 
 import proj.zoie.api.DocIDMapperFactory;
@@ -113,7 +113,7 @@ public class ZoieConfig
 
   public Analyzer getAnalyzer()
   {
-    return analyzer == null ? new StandardAnalyzer(Version.LUCENE_34)
+    return analyzer == null ? new StandardAnalyzer(Version.LUCENE_40)
         : analyzer;
   }
 

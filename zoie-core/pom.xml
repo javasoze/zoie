@@ -54,11 +54,13 @@
 			   <artifactId>git-commit-id-plugin</artifactId>
 			   <version>1.9</version>
 			   <executions>
+			   <!--
 			     <execution>
 			        <goals>
 			          <goal>revision</goal>
 			        </goals>
 			     </execution>
+			     -->
 			   </executions>
 			   <configuration>
 			     <prefix>git</prefix>
@@ -89,6 +91,17 @@
 			<artifactId>lucene-core</artifactId>
 			<version>4.0.0-BETA</version>
 		</dependency>
+		<dependency>
+	        <groupId>org.apache.lucene</groupId>
+	        <artifactId>lucene-analyzers-common</artifactId>
+	        <version>4.0.0-BETA</version>
+        </dependency>
+        <dependency>
+	        <groupId>org.apache.lucene</groupId>
+	        <artifactId>lucene-queryparser</artifactId>
+	        <version>4.0.0-BETA</version>
+        </dependency>
+                
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

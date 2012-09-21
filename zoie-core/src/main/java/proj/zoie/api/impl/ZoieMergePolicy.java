@@ -28,6 +28,7 @@ import org.apache.lucene.index.LogMergePolicy;
 import org.apache.lucene.index.MergePolicy;
 import org.apache.lucene.index.MergeScheduler;
 import org.apache.lucene.index.SegmentInfo;
+import org.apache.lucene.index.SegmentInfoPerCommit;
 import org.apache.lucene.index.SegmentInfos;
 
 /**
@@ -63,11 +64,14 @@ public class ZoieMergePolicy extends LogByteSizeMergePolicy
     }
   }
 
-  protected long size(SegmentInfo info) throws IOException
+  @Override
+  protected long size(SegmentInfoPerCommit infoPerCommit) throws IOException
   {
-    long byteSize = info.sizeInBytes(false);
-    float delRatio = (info.docCount <= 0 ? 0.0f : ((float)info.getDelCount() / (float)info.docCount));
-    return (info.docCount <= 0 ?  byteSize : (long)((float)byteSize * (1.0f - delRatio)));
+    long byteSize = infoPerCommit.sizeInBytes();
+    int docCount = infoPerCommit.info.getDocCount();
+    int delCount = infoPerCommit.getDelCount();
+    float delRatio = (docCount <= 0 ? 0.0f : ((float)delCount / (float)docCount));
+    return (docCount <= 0 ?  byteSize : (long)((float)byteSize * (1.0f - delRatio)));
   }
 
   public void setPartialExpunge(boolean doPartialExpunge)
@@ -131,12 +135,12 @@ public class ZoieMergePolicy extends LogByteSizeMergePolicy
   }
 
   @Override
-  protected boolean isMerged(SegmentInfos infos,int maxNumSegments,Map<SegmentInfo,Boolean> segmentsToOptimize) throws IOException {
+  protected boolean isMerged(SegmentInfos infos,int maxNumSegments,Map<SegmentInfoPerCommit,Boolean> segmentsToOptimize) throws IOException {
     final int numSegments = infos.size();
     int numToOptimize = 0;
-    SegmentInfo optimizeInfo = null;
+    SegmentInfoPerCommit optimizeInfo = null;
     for(int i=0;i<numSegments && numToOptimize <= maxNumSegments;i++) {
-      final SegmentInfo info = infos.info(i);
+      final SegmentInfoPerCommit info = infos.info(i);
       if (segmentsToOptimize.get(info)) {
         numToOptimize++;
         optimizeInfo = info;
@@ -151,7 +155,7 @@ public class ZoieMergePolicy extends LogByteSizeMergePolicy
    *  pending norms or deletes, is in the same dir as the
    *  writer, and matches the current compound file setting */
   @Override
-  protected boolean isMerged(SegmentInfo info)
+  protected boolean isMerged(SegmentInfoPerCommit info)
   throws IOException {
     IndexWriter w = writer.get();
     return !info.hasDeletions() &&
@@ -169,7 +173,7 @@ public class ZoieMergePolicy extends LogByteSizeMergePolicy
    *  (mergeFactor at a time) so the {@link MergeScheduler}
    *  in use may make use of concurrency. */
   @Override
-  public MergeSpecification findForcedMerges(SegmentInfos infos, int maxNumSegments, Map<SegmentInfo,Boolean> segmentsToOptimize) throws IOException {
+  public MergeSpecification findForcedMerges(SegmentInfos infos, int maxNumSegments, Map<SegmentInfoPerCommit,Boolean> segmentsToOptimize) throws IOException {
 
     assert maxNumSegments > 0;
 
@@ -183,7 +187,7 @@ public class ZoieMergePolicy extends LogByteSizeMergePolicy
       int last = infos.size();
       while(last > 0)
       {
-        final SegmentInfo info = infos.info(--last);
+        final SegmentInfoPerCommit info = infos.info(--last);
         if (segmentsToOptimize.get(info))
         {
           last++;
@@ -274,7 +278,7 @@ public class ZoieMergePolicy extends LogByteSizeMergePolicy
       {
         if(partialExpunge)
         {
-          SegmentInfo info = infos.info(mergeStart);
+          SegmentInfoPerCommit info = infos.info(mergeStart);
           int delCount = info.getDelCount();
           if(delCount > maxDelCount)
           {
@@ -344,7 +348,7 @@ public class ZoieMergePolicy extends LogByteSizeMergePolicy
 
     if(numLargeSegs < numSegs)
     {
-      List<SegmentInfo> smallSegmentList = infos.asList().subList(numLargeSegs, numSegs);
+      List<SegmentInfoPerCommit> smallSegmentList = infos.asList().subList(numLargeSegs, numSegs);
       SegmentInfos smallSegments = new SegmentInfos();
       smallSegments.addAll(smallSegmentList);
       spec = super.findForcedDeletesMerges(smallSegments);
@@ -353,7 +357,7 @@ public class ZoieMergePolicy extends LogByteSizeMergePolicy
     if(spec == null) spec = new MergeSpecification();
     for(int i = 0; i < numLargeSegs; i++)
     {
-      SegmentInfo info = infos.info(i);
+      SegmentInfoPerCommit info = infos.info(i);
       if(info.hasDeletions())
       {
         spec.add(new OneMerge(infos.asList().subList(i, i + 1)));        
@@ -380,7 +384,7 @@ public class ZoieMergePolicy extends LogByteSizeMergePolicy
 
     long totalLargeSegSize = 0;
     long totalSmallSegSize = 0;
-    SegmentInfo info;
+    SegmentInfoPerCommit info;
 
     // compute the total size of large segments
     for(int i = 0; i < numLargeSegs; i++)
@@ -431,7 +435,7 @@ public class ZoieMergePolicy extends LogByteSizeMergePolicy
     else
     {
       // apply the log merge policy to small segments.
-      List<SegmentInfo> smallSegmentList = infos.asList().subList(numLargeSegs, numSegs);
+      List<SegmentInfoPerCommit> smallSegmentList = infos.asList().subList(numLargeSegs, numSegs);
       SegmentInfos smallSegments = new SegmentInfos();
       smallSegments.addAll(smallSegmentList);
       MergeSpecification spec = super.findMerges(smallSegments);
@@ -456,7 +460,7 @@ public class ZoieMergePolicy extends LogByteSizeMergePolicy
 
     for(int i = maxNumSegments - 1; i >= 0; i--)
     {
-      SegmentInfo info = infos.info(i);
+      SegmentInfoPerCommit info = infos.info(i);
       int delCount = info.getDelCount();
       if(delCount > maxDelCount)
       {

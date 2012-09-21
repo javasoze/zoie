@@ -12,17 +12,16 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.DefaultSimilarity;
-import org.apache.lucene.search.Similarity;
+import org.apache.lucene.search.similarities.DefaultSimilarity;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.util.Version;
 import org.apache.solr.core.IndexReaderFactory;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 
-
+import proj.zoie.api.DefaultDirectoryManager;
 import proj.zoie.api.DirectoryManager;
 import proj.zoie.api.DirectoryManager.DIRECTORY_MODE;
-import proj.zoie.api.DefaultDirectoryManager;
 import proj.zoie.api.Zoie;
 import proj.zoie.api.ZoieException;
 import proj.zoie.hourglass.impl.HourGlassScheduler;
@@ -34,7 +33,6 @@ import proj.zoie.hourglass.mbean.HourglassAdminMBean;
 import proj.zoie.impl.indexing.DefaultIndexReaderDecorator;
 import proj.zoie.impl.indexing.ZoieConfig;
 import proj.zoie.impl.indexing.ZoieSystem;
-import proj.zoie.mbean.ZoieSystemAdmin;
 import proj.zoie.mbean.ZoieSystemAdminMBean;
 
 public class ZoieSystemHome {
@@ -55,7 +53,7 @@ public class ZoieSystemHome {
 		}
 		catch(Exception e){
 			log.error(e.getMessage()+", defaulting to "+StandardAnalyzer.class,e);
-			analyzer = new StandardAnalyzer(Version.LUCENE_29);
+			analyzer = new StandardAnalyzer(Version.LUCENE_40);
 		}
 		
 		Similarity similarity = null;

@@ -17,11 +17,13 @@ package proj.zoie.api;
  */
 import java.io.IOException;
 
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.search.ConstantScoreQuery;
 import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.util.Bits;
 
 /**
  * Filter implementation based on a list of uids
@@ -36,7 +38,8 @@ public class UIDFilter extends Filter {
 	}
 
 	@Override
-	public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
+	public DocIdSet getDocIdSet(AtomicReaderContext ctx,Bits bits) throws IOException {
+		AtomicReader reader = ctx.reader();
 		if (reader instanceof ZoieIndexReader<?>) {
 			return new UIDDocIdSet(_filteredIDs, ((ZoieIndexReader<?>)reader).getDocIDMaper());
 		}

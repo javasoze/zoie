@@ -33,9 +33,11 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.search.ConstantScoreQuery;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Filter;
-import org.apache.lucene.search.Similarity;
+import org.apache.lucene.search.similarities.Similarity;
 
 import proj.zoie.api.DataConsumer;
 import proj.zoie.api.ZoieException;
@@ -79,36 +81,23 @@ public abstract class LuceneIndexDataLoader<R extends IndexReader> implements Da
     private final void purgeDocuments(){
     	if (_purgeFilter!=null){
     		BaseSearchIndex<R> idx = getSearchIndex();
-    		IndexReader writeReader = null;
+    		IndexWriter writer = null;
     		log.info("purging docs started...");
     		int count = 0;
     		long start = System.currentTimeMillis();
 
-        ZoieIndexReader<R> reader = null;
     		try{
-          synchronized(idx)
-          {
-            reader = idx.openIndexReader();
-            if (reader != null)
-              reader.incZoieRef();
-          }
 
     		  writeReader = idx.openIndexReaderForDelete();
-
-    			DocIdSetIterator iter = _purgeFilter.getDocIdSet(reader).iterator();
-    			
-    			int doc;
-    			while((doc = iter.nextDoc()) != DocIdSetIterator.NO_MORE_DOCS){
-    				count++;
-    				writeReader.deleteDocument(doc);
-    			}
+    		  
+    		  ConstantScoreQuery q = new ConstantScoreQuery(_purgeFilter);
+    		  
+    		  writer.deleteDocuments(q);
     		}
     		catch(Throwable th){
     			log.error("problem creating purge filter: "+th.getMessage(),th);
     		}
     		finally{
-          if (reader != null)
-            reader.decZoieRef();
     			if (writeReader!=null){
     				try{
     				  writeReader.close();

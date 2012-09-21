@@ -24,18 +24,17 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
-import org.apache.lucene.index.FilterIndexReader;
+import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.FilterAtomicReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.MultiReader;
-import org.apache.lucene.index.TermDocs;
-import org.apache.lucene.index.TermPositions;
+import org.apache.lucene.index.ReaderUtil;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.util.ReaderUtil;
 
 import proj.zoie.api.impl.DefaultIndexReaderMerger;
 import proj.zoie.api.indexing.IndexReaderDecorator;
 
-public abstract class ZoieIndexReader<R extends IndexReader> extends FilterIndexReader
+public abstract class ZoieIndexReader<R extends IndexReader> extends FilterAtomicReader
 {
   private static final Logger log = Logger.getLogger(ZoieIndexReader.class);
 	public static final long DELETED_UID = Long.MIN_VALUE;
@@ -205,7 +204,7 @@ public abstract class ZoieIndexReader<R extends IndexReader> extends FilterIndex
 		return mergeIndexReaders(readerList,new DefaultIndexReaderMerger<T>());
 	}
 		
-	protected ZoieIndexReader(IndexReader in,IndexReaderDecorator<R> decorator) throws IOException
+	protected ZoieIndexReader(AtomicReader in,IndexReaderDecorator<R> decorator) throws IOException
 	{
 		super(in);
 		_decorator = decorator;

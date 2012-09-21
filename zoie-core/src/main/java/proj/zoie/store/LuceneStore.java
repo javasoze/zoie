@@ -10,17 +10,19 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.DocsAndPositionsEnum;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
-import org.apache.lucene.index.TermPositions;
 import org.apache.lucene.search.ConstantScoreQuery;
 import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.Version;
 
 import proj.zoie.api.ZoieSegmentReader;
@@ -34,11 +36,11 @@ public class LuceneStore extends AbstractZoieStore {
 	
 	
 	private static class ReaderData{
-		final IndexReader reader;
+		final AtomicReader reader;
 		final Long2IntRBTreeMap uidMap;
 		final long _minUID;
 		final long _maxUID;
-		ReaderData(IndexReader reader) throws IOException{
+		ReaderData(AtomicReader reader) throws IOException{
 			this.reader = reader;
 			long minUID = Long.MAX_VALUE;
 			long maxUID = Long.MIN_VALUE;
@@ -51,31 +53,20 @@ public class LuceneStore extends AbstractZoieStore {
 				_maxUID = Long.MIN_VALUE;
 				return;
 			}
-			TermPositions tp = null;
-			byte[] payloadBuffer = new byte[8];       // four bytes for a long
-			try
-			{
-	          tp = reader.termPositions(ZoieSegmentReader.UID_TERM);
-	          while (tp.next())
-	          {
-	            int doc = tp.doc();
+			DocsAndPositionsEnum tp = reader.termPositionsEnum(ZoieSegmentReader.UID_TERM);
+			int doc;
+	        while ((doc = tp.nextDoc()) != DocsAndPositionsEnum.NO_MORE_DOCS)
+	        {
 	            assert doc < maxDoc;
 	            
 	            tp.nextPosition();
-	            tp.getPayload(payloadBuffer, 0);
-	            long uid = ZoieSegmentReader.bytesToLong(payloadBuffer);
+	            BytesRef payLoad = tp.getPayload();
+	            long uid = ZoieSegmentReader.bytesToLong(payLoad.bytes);
 	            if(uid < minUID) minUID = uid;
 	            if(uid > maxUID) maxUID = uid;
 	            uidMap.put(uid, doc);
-	    	  }
-			}
-			finally
-			{
-	          if (tp!=null)
-	          {
-	        	  tp.close();
-	          }
-			}
+	    	}
+			
 			
 			_minUID = minUID;
 			_maxUID = maxUID;
@@ -108,7 +99,7 @@ public class LuceneStore extends AbstractZoieStore {
 	
 	public void open() throws IOException{
 		if (_closed){
-		  IndexWriterConfig idxWriterConfig = new IndexWriterConfig(Version.LUCENE_34,new StandardAnalyzer(Version.LUCENE_34));
+		  IndexWriterConfig idxWriterConfig = new IndexWriterConfig(Version.LUCENE_40,new StandardAnalyzer(Version.LUCENE_34));
 		  idxWriterConfig.setMergePolicy(new ZoieMergePolicy());
 		  idxWriterConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
 		  _idxWriter = new IndexWriter(_dir,idxWriterConfig);
@@ -230,7 +221,7 @@ public class LuceneStore extends AbstractZoieStore {
 	}
 
 	@Override
-	protected byte[] getFromStore(long uid) throws IOException {
+	protected BytesRef getFromStore(long uid) throws IOException {
 		int docid = mapDocId(uid);
 		if (docid<0) return null;
 		IndexReader reader = null;
