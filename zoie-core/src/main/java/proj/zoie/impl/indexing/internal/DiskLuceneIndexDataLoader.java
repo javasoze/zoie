@@ -181,7 +181,7 @@ public class DiskLuceneIndexDataLoader<R extends IndexReader> extends LuceneInde
 		  try
 		  {
 		    writer=idx.openIndexWriter(_analyzer, _similarity);
-		    writer.expungeDeletes(true);
+		    writer.forceMergeDeletes();
 		  }
 		  finally
 		  {
@@ -209,7 +209,7 @@ public class DiskLuceneIndexDataLoader<R extends IndexReader> extends LuceneInde
 		  try
 		  {
 		    writer=idx.openIndexWriter(_analyzer, _similarity);
-		    writer.optimize(numSegs);
+		    writer.forceMerge(numSegs);
 		  }
 		  finally
 		  {

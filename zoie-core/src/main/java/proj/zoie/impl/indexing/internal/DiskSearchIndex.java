@@ -28,7 +28,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.SerialMergeScheduler;
-import org.apache.lucene.search.Similarity;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.Version;
 
@@ -232,18 +232,6 @@ public class DiskSearchIndex<R extends IndexReader> extends BaseSearchIndex<R>{
 
     return _dispenser.getIndexReader();
     
-  }
-
-
-  @Override
-  protected IndexReader openIndexReaderForDelete() throws IOException {
-    Directory directory = _dirMgr.getDirectory(true);
-    if (IndexReader.indexExists(directory)){		
-      return IndexReader.open(directory, _deletionPolicy, false);
-    }
-    else{
-      return null;
-    }
   }
 
   /**

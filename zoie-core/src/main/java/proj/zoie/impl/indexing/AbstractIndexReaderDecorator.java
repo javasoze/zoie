@@ -17,20 +17,25 @@ package proj.zoie.impl.indexing;
  */
 import java.io.IOException;
 
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.search.DocIdSet;
 
-import proj.zoie.api.ZoieIndexReader;
+import proj.zoie.api.ZoieSegmentReader;
 import proj.zoie.api.indexing.IndexReaderDecorator;
 
-public abstract class AbstractIndexReaderDecorator<R extends IndexReader> implements IndexReaderDecorator<R> {
+public abstract class AbstractIndexReaderDecorator<R extends AtomicReader> implements IndexReaderDecorator<R> {
 
-	public abstract R decorate(ZoieIndexReader<R> indexReader) throws IOException;
+  @Override
+  public abstract R decorate(ZoieSegmentReader<R> indexReader) throws IOException;
 
-	public R redecorate(R decorated, ZoieIndexReader<R> copy) throws IOException {
-		return decorate(copy);
-	}
-  public void setDeleteSet(IndexReader reader, DocIdSet docIds)
+
+  @Override
+  public R redecorate(R decorated, ZoieSegmentReader<R> copy,boolean withDeletes) throws IOException {
+	return decorate(copy);
+  }
+
+  @Override
+  public void setDeleteSet(AtomicReader reader, DocIdSet docIds)
   {
     // do nothing 
   }

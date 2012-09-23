@@ -2,13 +2,12 @@ package proj.zoie.api.impl.util;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
@@ -19,12 +18,6 @@ import proj.zoie.api.DocIDMapper;
 import proj.zoie.api.Zoie;
 import proj.zoie.api.ZoieIndexReader;
 
-import org.apache.lucene.queryparser.surround.parser.QueryParser;
-
-/**
- * @author "Xiaoyang Gu<xgu@linkedin.com>"
- *
- */
 public class SearchUtil
 {
   private static final Logger log = Logger.getLogger(SearchUtil.class);
@@ -47,7 +40,8 @@ public class SearchUtil
     try
     {
       q = parser.parse(query);
-    } catch (ParseException e)
+    } 
+    catch (ParseException e)
     {
       return "query parsing failed " + e;
     }
@@ -66,9 +60,7 @@ public class SearchUtil
         ZoieIndexReader reader = readers.get(readerid);
         DocIDMapper idmapper = reader.getDocIDMaper();
         
-        Collection fieldnames = reader.getFieldNames(FieldOption.ALL);
-        String fieldnamess = Arrays.toString(fieldnames.toArray());
-        retstr += "fields: " + fieldnamess + "\n";
+        
         searcher = new IndexSearcher(reader);
         TopDocs hits = searcher.search(q, 10);
         String docs = "";
@@ -112,15 +104,15 @@ public class SearchUtil
       {
         retstr += "reader: " + readerid + "\n";
         ZoieIndexReader reader = readers.get(readerid);
-        DocIDMapper<?> idmapper = reader.getDocIDMaper();
-        int docid = idmapper.getDocID(UID);
+        
+        int docid = reader.getDocID(UID);
         retstr += "docid(in reader): " + formatter.format(docid) + "\n";
         if (docid == DocIDMapper.NOT_FOUND)
         {
           retstr += "not found in this reader\n";
           continue;
         }
-        if (docid==ZoieIndexReader.DELETED_UID || reader.isDeleted(docid))
+        if (docid==ZoieIndexReader.DELETED_UID || !reader.getLiveDocs().get(docid))
         {
           retstr += "deleted\n";
         }

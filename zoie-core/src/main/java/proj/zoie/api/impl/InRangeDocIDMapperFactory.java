@@ -69,7 +69,7 @@ public class InRangeDocIDMapperFactory implements DocIDMapperFactory
   public DocIDMapper<DocIDArray> getDocIDMapper(ZoieMultiReader<?> reader)
   {
     int docCount = reader.maxDoc();
-    final ZoieSegmentReader<?>[] subreaders = (ZoieSegmentReader<?>[]) (reader
+    final ZoieSegmentReader[] subreaders = (ZoieSegmentReader[]) (reader
         .getSequentialSubReaders());
     final int[] starts = reader.getStarts();
 

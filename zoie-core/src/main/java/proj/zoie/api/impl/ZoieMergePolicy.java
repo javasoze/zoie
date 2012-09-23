@@ -22,12 +22,10 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.index.CorruptIndexException;
-import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.LogByteSizeMergePolicy;
 import org.apache.lucene.index.LogMergePolicy;
 import org.apache.lucene.index.MergePolicy;
 import org.apache.lucene.index.MergeScheduler;
-import org.apache.lucene.index.SegmentInfo;
 import org.apache.lucene.index.SegmentInfoPerCommit;
 import org.apache.lucene.index.SegmentInfos;
 
@@ -157,11 +155,8 @@ public class ZoieMergePolicy extends LogByteSizeMergePolicy
   @Override
   protected boolean isMerged(SegmentInfoPerCommit info)
   throws IOException {
-    IndexWriter w = writer.get();
     return !info.hasDeletions() &&
-    !info.hasSeparateNorms() &&
-    info.dir == w.getDirectory() &&
-    info.getUseCompoundFile() == getUseCompoundFile();
+    info.info.getUseCompoundFile() == getUseCompoundFile();
   }
 
   /** Returns the merges necessary to optimize the index.

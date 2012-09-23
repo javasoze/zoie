@@ -29,8 +29,6 @@ import org.apache.lucene.util.Bits;
  * Filter implementation based on a list of uids
  */
 public class UIDFilter extends Filter {
-	private static final long serialVersionUID = 1L;
-
 	private final long[] _filteredIDs;
 
 	public UIDFilter(long[] filteredIDs) {
@@ -40,12 +38,12 @@ public class UIDFilter extends Filter {
 	@Override
 	public DocIdSet getDocIdSet(AtomicReaderContext ctx,Bits bits) throws IOException {
 		AtomicReader reader = ctx.reader();
-		if (reader instanceof ZoieIndexReader<?>) {
-			return new UIDDocIdSet(_filteredIDs, ((ZoieIndexReader<?>)reader).getDocIDMaper());
+		if (reader instanceof ZoieSegmentReader<?>) {
+			return new UIDDocIdSet(_filteredIDs, ((ZoieSegmentReader<?>)reader).getDocIDMaper());
 		}
 		else {
 			throw new IllegalArgumentException(
-			"UIDFilter may only load from ZoieIndexReader instances");
+			"UIDFilter may only load from "+ZoieSegmentReader.class+" instances");
 		}
 	}
 	

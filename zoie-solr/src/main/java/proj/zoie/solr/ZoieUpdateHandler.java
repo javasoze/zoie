@@ -62,6 +62,7 @@ public class ZoieUpdateHandler extends UpdateHandler {
 		
 		//Document doc = cmd.doc;
 		SolrInputDocument inputDoc = cmd.solrDoc;
+		inputDoc.
 		
 		ZoieSystemHome zoieHome = ZoieSystemHome.getInstance(_core);
 		if (zoieHome==null){

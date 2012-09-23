@@ -35,14 +35,12 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.search.ConstantScoreQuery;
-import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.similarities.Similarity;
 
 import proj.zoie.api.DataConsumer;
 import proj.zoie.api.ZoieException;
 import proj.zoie.api.ZoieHealth;
-import proj.zoie.api.ZoieIndexReader;
 import proj.zoie.api.ZoieSegmentReader;
 import proj.zoie.api.indexing.AbstractZoieIndexable;
 import proj.zoie.api.indexing.IndexingEventListener;
@@ -87,26 +85,16 @@ public abstract class LuceneIndexDataLoader<R extends IndexReader> implements Da
     		long start = System.currentTimeMillis();
 
     		try{
-
-    		  writeReader = idx.openIndexReaderForDelete();
-    		  
-    		  ConstantScoreQuery q = new ConstantScoreQuery(_purgeFilter);
-    		  
+    		  writer = idx.openIndexWriter(null, null);    		  
+    		  ConstantScoreQuery q = new ConstantScoreQuery(_purgeFilter);    		  
     		  writer.deleteDocuments(q);
+    		  writer.commit();
     		}
     		catch(Throwable th){
     			log.error("problem creating purge filter: "+th.getMessage(),th);
     		}
     		finally{
-    			if (writeReader!=null){
-    				try{
-    				  writeReader.close();
-    				}
-    				catch(IOException ioe){
-    					ZoieHealth.setFatal();
-    					log.error(ioe.getMessage(),ioe);
-    				}
-    			}
+    			idx.closeIndexWriter();
     		}
     		
     		long end = System.currentTimeMillis();

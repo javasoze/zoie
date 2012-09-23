@@ -19,14 +19,19 @@ import java.util.Random;
 import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.MultiReader;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Filter;
@@ -36,6 +41,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.Version;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -69,9 +75,8 @@ public class ZoieTest extends ZoieTestCaseBase {
 	}
 
 	private static int countHits(
-			ZoieSystem<IndexReader, String> idxSystem,
-			Query q) throws IOException {
-		Searcher searcher = null;
+		ZoieSystem<AtomicReader, String> idxSystem,Query q) throws IOException {
+		IndexSearcher searcher = null;
 		MultiReader reader = null;
 		List<ZoieIndexReader<IndexReader>> readers = null;
 		try {
@@ -86,9 +91,7 @@ public class ZoieTest extends ZoieTestCaseBase {
 			return hits.totalHits;
 		} finally {
 			try {
-				if (searcher != null) {
-					searcher.close();
-					searcher = null;
+				if (reader != null) {
 					reader.close();
 					reader = null;
 				}
@@ -101,7 +104,7 @@ public class ZoieTest extends ZoieTestCaseBase {
 	@Test
 	public void testIndexWithAnalyzer() throws ZoieException, IOException {
 		File idxDir = getIdxDir();
-		ZoieSystem<IndexReader, String> idxSystem = createZoie(
+		ZoieSystem<AtomicReader, String> idxSystem = createZoie(
 				idxDir, true, 20, new WhitespaceAnalyzer(), null,
 				ZoieConfig.DEFAULT_VERSION_COMPARATOR,false);
 		idxSystem.start();
@@ -121,7 +124,7 @@ public class ZoieTest extends ZoieTestCaseBase {
 		memoryProvider.flush();
 		idxSystem.syncWithVersion(10000, "1");
 		List<ZoieIndexReader<IndexReader>> readers = null;
-		Searcher searcher = null;
+		IndexSearcher searcher = null;
 		MultiReader reader = null;
 		try {
 			readers = idxSystem.getIndexReaders();
@@ -209,9 +212,7 @@ public class ZoieTest extends ZoieTestCaseBase {
 			// assertEquals(String.valueOf((long)((long)Integer.MAX_VALUE*2L)),searcher.doc(hits.scoreDocs[0].doc).get("id"));
 		} finally {
 			try {
-				if (searcher != null) {
-					searcher.close();
-					searcher = null;
+				if (reader != null) {
 					reader.close();
 					reader = null;
 				}
@@ -224,7 +225,7 @@ public class ZoieTest extends ZoieTestCaseBase {
 	@Test
 	public void testRealtime2() throws ZoieException {
 		File idxDir = getIdxDir();
-		ZoieSystem<IndexReader, String> idxSystem = createZoie(
+		ZoieSystem<AtomicReader, String> idxSystem = createZoie(
 				idxDir, true, ZoieConfig.DEFAULT_VERSION_COMPARATOR);
 		idxSystem.start();
 
@@ -268,7 +269,7 @@ public class ZoieTest extends ZoieTestCaseBase {
 	private static class EvenIDPurgeFilter extends Filter{
 
     @Override
-    public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
+    public DocIdSet getDocIdSet(AtomicReaderContext ctx,Bits bits) throws IOException {
       if (reader instanceof ZoieIndexReader){
         final ZoieIndexReader<IndexReader> zoieReader = (ZoieIndexReader<IndexReader>)reader;
         return new DocIdSet(){
@@ -322,7 +323,7 @@ public class ZoieTest extends ZoieTestCaseBase {
     final int[] flushNum = {0};
     final String[] flushVersion = {null};
 
-    ZoieSystem<IndexReader, String> idxSystem = createZoie(
+    ZoieSystem<AtomicReader, String> idxSystem = createZoie(
         idxDir, true, ZoieConfig.DEFAULT_VERSION_COMPARATOR,true);
 
     idxSystem.start();
@@ -459,7 +460,7 @@ public class ZoieTest extends ZoieTestCaseBase {
 	@Test
   public void testPurgeFilter() throws Exception {
     File idxDir = getIdxDir();
-    ZoieSystem<IndexReader, String> idxSystem = createZoie(
+    ZoieSystem<AtomicReader, String> idxSystem = createZoie(
         idxDir, true, ZoieConfig.DEFAULT_VERSION_COMPARATOR,true);
 
     idxSystem.setPurgeFilter(new EvenIDPurgeFilter());
@@ -1411,7 +1412,7 @@ public class ZoieTest extends ZoieTestCaseBase {
 		DirectoryManager dirMgr = new DefaultDirectoryManager(idxDir);
 
 		String query = "zoie";
-		QueryParser parser = new QueryParser(Version.LUCENE_34,
+		QueryParser parser = new QueryParser(Version.LUCENE_40,
 				"contents", idxSystem.getAnalyzer());
 		Query q = null;
 		try {

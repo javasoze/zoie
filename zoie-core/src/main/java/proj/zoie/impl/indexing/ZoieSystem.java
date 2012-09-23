@@ -33,6 +33,7 @@ import javax.management.StandardMBean;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.similarities.DefaultSimilarity;
@@ -70,7 +71,7 @@ import proj.zoie.mbean.ZoieSystemAdminMBean;
  * Zoie system, main class.
  */
 
-public class ZoieSystem<R extends IndexReader, D> 
+public class ZoieSystem<R extends AtomicReader, D> 
 extends AsyncDataConsumer<D> implements Zoie<R, D>
 {
 
@@ -489,7 +490,7 @@ extends AsyncDataConsumer<D> implements Zoie<R, D>
    * @param versionComparator
    * @return
    */
-  public static <D> ZoieSystem<IndexReader, D> buildDefaultInstance(File idxDir, ZoieIndexableInterpreter<D> interpreter,
+  public static <D> ZoieSystem<AtomicReader, D> buildDefaultInstance(File idxDir, ZoieIndexableInterpreter<D> interpreter,
       int batchSize, long batchDelay, boolean realtime, Comparator<String> versionComparator)
   {
     return buildDefaultInstance(idxDir, interpreter, new StandardAnalyzer(Version.LUCENE_40), new DefaultSimilarity(), batchSize, batchDelay, realtime, versionComparator);
@@ -507,15 +508,15 @@ extends AsyncDataConsumer<D> implements Zoie<R, D>
    * @param versionComparator
    * @return
    */
-  public static <D> ZoieSystem<IndexReader, D> buildDefaultInstance(File idxDir, ZoieIndexableInterpreter<D> interpreter,
+  public static <D> ZoieSystem<AtomicReader, D> buildDefaultInstance(File idxDir, ZoieIndexableInterpreter<D> interpreter,
       Analyzer analyzer, Similarity similarity, int batchSize, long batchDelay, boolean realtime, Comparator<String> versionComparator)
   {
-    return new ZoieSystem<IndexReader, D>(idxDir, interpreter, new DefaultIndexReaderDecorator(), analyzer, similarity, batchSize, batchDelay, realtime, versionComparator,false);
+    return new ZoieSystem(idxDir, interpreter, new DefaultIndexReaderDecorator(), analyzer, similarity, batchSize, batchDelay, realtime, versionComparator,false);
   }
   
-  public static <D> ZoieSystem<IndexReader, D> buildDefaultInstance(File idxDir, ZoieIndexableInterpreter<D> interpreter,ZoieConfig zoieConfig)
+  public static <D> ZoieSystem<AtomicReader, D> buildDefaultInstance(File idxDir, ZoieIndexableInterpreter<D> interpreter,ZoieConfig zoieConfig)
   {
-	 return new ZoieSystem<IndexReader, D>(idxDir, interpreter, new DefaultIndexReaderDecorator(), zoieConfig);
+	 return new ZoieSystem(idxDir, interpreter, new DefaultIndexReaderDecorator(), zoieConfig);
   }
   
   public void setPurgeFilter(Filter purgeFilter){

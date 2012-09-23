@@ -13,9 +13,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.CompositeReader;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermEnum;
 import org.apache.lucene.store.FSDirectory;
 
 import proj.zoie.api.impl.util.PriorityQueue;
@@ -68,7 +68,11 @@ public class TermFileBuilder {
 			
 		});
 		
-		IndexReader reader = IndexReader.open(FSDirectory.open(idxDir), true);
+		
+		DirectoryReader reader = DirectoryReader.open(FSDirectory.open(idxDir));
+		
+		//CompositeReader r = reader.getTopReaderContext().reader();
+		
 		TermEnum te = reader.terms(new Term(field,""));
 		while(te.next()){
 			Term term = te.term();

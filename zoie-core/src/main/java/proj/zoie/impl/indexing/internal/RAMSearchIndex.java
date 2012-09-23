@@ -139,18 +139,7 @@ public class RAMSearchIndex<R extends IndexReader> extends BaseSearchIndex<R>
     return _currentReader;
   }
 
-  @Override
-  protected IndexReader openIndexReaderForDelete() throws IOException
-  {
-    if (IndexReader.indexExists(_directory))
-    {
-      return IndexReader.open(_directory, false);
-    } else
-    {
-      return null;
-    }
-  }
-
+  
   private ZoieIndexReader<R> openIndexReaderInternal() throws IOException
   {
     if (IndexReader.indexExists(_directory))
