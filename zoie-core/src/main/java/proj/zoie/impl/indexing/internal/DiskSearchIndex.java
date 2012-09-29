@@ -23,6 +23,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -40,7 +41,7 @@ import proj.zoie.api.impl.ZoieMergePolicy.MergePolicyParams;
 import proj.zoie.api.impl.util.IndexUtil;
 import proj.zoie.api.indexing.IndexReaderDecorator;
 
-public class DiskSearchIndex<R extends IndexReader> extends BaseSearchIndex<R>{
+public class DiskSearchIndex<R extends AtomicReader> extends BaseSearchIndex<R>{
   private final DirectoryManager        _dirMgr;
   private final IndexReaderDispenser<R> _dispenser;
 

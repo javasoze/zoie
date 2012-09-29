@@ -25,6 +25,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -36,14 +37,13 @@ import org.apache.lucene.util.Version;
 
 import proj.zoie.api.DocIDMapper;
 import proj.zoie.api.ZoieIndexReader;
-import proj.zoie.api.ZoieMultiReader;
 import proj.zoie.api.impl.ZoieMergePolicy;
 import proj.zoie.api.impl.ZoieMergePolicy.MergePolicyParams;
 import proj.zoie.api.impl.util.FileUtil;
 import proj.zoie.api.impl.util.IndexUtil;
 import proj.zoie.api.indexing.IndexReaderDecorator;
 
-public class RAMSearchIndex<R extends IndexReader> extends BaseSearchIndex<R>
+public class RAMSearchIndex<R extends AtomicReader> extends BaseSearchIndex<R>
 {
   private volatile String _version;
   private final Directory _directory;
@@ -151,7 +151,7 @@ public class RAMSearchIndex<R extends IndexReader> extends BaseSearchIndex<R>
         // for RAM indexes, just get a new index reader
         srcReader = IndexReader.open(_directory, true);
         finalReader = ZoieIndexReader.open(srcReader, _decorator);
-        DocIDMapper<?> mapper = _idxMgr._docIDMapperFactory.getDocIDMapper((ZoieMultiReader<R>) finalReader);
+        DocIDMapper<?> mapper = _idxMgr._docIDMapperFactory.getDocIDMapper((ZoieIndexReader<R>) finalReader);
         finalReader.setDocIDMapper(mapper);
         return finalReader;
       } catch (IOException ioe)
@@ -234,7 +234,7 @@ public class RAMSearchIndex<R extends IndexReader> extends BaseSearchIndex<R>
         reader = (ZoieIndexReader<R>) _currentReader.reopen(true);
         if (reader != _currentReader)
         {
-          DocIDMapper<?> mapper = _idxMgr._docIDMapperFactory.getDocIDMapper((ZoieMultiReader<R>) reader);
+          DocIDMapper<?> mapper = _idxMgr._docIDMapperFactory.getDocIDMapper((ZoieIndexReader<R>) reader);
           reader.setDocIDMapper(mapper);
         }
       }

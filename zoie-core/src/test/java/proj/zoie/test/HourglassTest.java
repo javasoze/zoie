@@ -26,13 +26,13 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.MultiReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
@@ -43,7 +43,6 @@ import proj.zoie.api.DocIDMapper;
 import proj.zoie.api.Zoie;
 import proj.zoie.api.ZoieException;
 import proj.zoie.api.ZoieIndexReader;
-import proj.zoie.api.ZoieMultiReader;
 import proj.zoie.api.ZoieSegmentReader;
 import proj.zoie.api.indexing.IndexReaderDecorator;
 import proj.zoie.hourglass.api.HourglassIndexable;
@@ -177,20 +176,20 @@ public class HourglassTest extends ZoieTestCaseBase {
     zConfig.setBatchDelay(30000);
     zConfig.setFreshness(100);
     zConfig.setRtIndexing(true);
-    Hourglass<IndexReader, String> hourglass = new Hourglass<IndexReader, String>(
+    Hourglass<AtomicReader, String> hourglass = new Hourglass<AtomicReader, String>(
         factory, new HourglassTestInterpreter(),
-        new IndexReaderDecorator<IndexReader>() {
+        new IndexReaderDecorator<AtomicReader>() {
 
           @Override
-          public IndexReader decorate(
-              ZoieIndexReader<IndexReader> indexReader)
+          public AtomicReader decorate(
+              ZoieIndexReader<AtomicReader> indexReader)
               throws IOException {
             return indexReader;
           }
 
           @Override
-          public IndexReader redecorate(IndexReader decorated,
-              ZoieIndexReader<IndexReader> copy,
+          public AtomicReader redecorate(AtomicReader decorated,
+              ZoieIndexReader<AtomicReader> copy,
               boolean withDeletes) throws IOException {
             // TODO Auto-generated method stub
             return decorated;
@@ -222,7 +221,7 @@ public class HourglassTest extends ZoieTestCaseBase {
     System.out.println("initial number of DOCs: " + initNumDocs);
     assertTrue("initNumDocs should > 2", initNumDocs > 2);
 
-    List<ZoieIndexReader<IndexReader>> readers = hourglass.getIndexReaders();
+    List<ZoieIndexReader<AtomicReader>> readers = hourglass.getIndexReaders();
     try
     {
       assertTrue("before delete, 0 should be found", findUID(readers, 0));
@@ -281,7 +280,7 @@ public class HourglassTest extends ZoieTestCaseBase {
     hourglass.shutdown();
   }
 
-  private boolean findUID(List<ZoieIndexReader<IndexReader>> readers, long uid)
+  private boolean findUID(List<ZoieIndexReader<AtomicReader>> readers, long uid)
   {
     boolean found = false;
     for(ZoieIndexReader reader : readers)
@@ -461,8 +460,8 @@ public class HourglassTest extends ZoieTestCaseBase {
 
       @Override
       public void onIndexReaderCleanUp(ZoieIndexReader<IndexReader> indexReader) {
-        if (indexReader instanceof ZoieMultiReader) {
-          ZoieSegmentReader[] segments = (ZoieSegmentReader[]) ((ZoieMultiReader) indexReader).getSequentialSubReaders();
+        if (indexReader instanceof ZoieIndexReader) {
+          ZoieSegmentReader[] segments = (ZoieSegmentReader[]) ((ZoieIndexReader) indexReader).getSequentialSubReaders();
           for (ZoieSegmentReader segmentReader : segments) {
             handleSegment(segmentReader);
           }

@@ -25,7 +25,7 @@ import java.util.Queue;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.search.similarities.Similarity;
 
 import proj.zoie.api.DataConsumer;
@@ -42,7 +42,7 @@ import proj.zoie.impl.indexing.IndexUpdatedEvent;
  * @author ymatsuda, xgu
  *
  */
-public class RealtimeIndexDataLoader<R extends IndexReader, D> extends BatchedIndexDataLoader<R,D>
+public class RealtimeIndexDataLoader<R extends AtomicReader, D> extends BatchedIndexDataLoader<R,D>
 {
   private int _currentBatchSize;
   private final DataConsumer<ZoieIndexable>  _ramConsumer;

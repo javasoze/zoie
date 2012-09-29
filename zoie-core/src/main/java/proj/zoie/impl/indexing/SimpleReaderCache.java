@@ -1,17 +1,18 @@
 package proj.zoie.impl.indexing;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.IndexReader;
 
 import proj.zoie.api.IndexReaderFactory;
 import proj.zoie.api.ZoieException;
 import proj.zoie.api.ZoieIndexReader;
 
-public class SimpleReaderCache<R extends IndexReader> extends AbstractReaderCache<R>{
+public class SimpleReaderCache<R extends AtomicReader> extends AbstractReaderCache<R>{
 
 	private static final Logger logger = Logger.getLogger(SimpleReaderCache.class);
 	

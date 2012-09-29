@@ -33,9 +33,9 @@ import org.apache.lucene.util.BytesRef;
 
 import proj.zoie.api.indexing.IndexReaderDecorator;
 
-public class ZoieMultiReader<R extends AtomicReader> extends BaseCompositeReader<ZoieSegmentReader<R>> implements UIDMapper,Cloneable
+public class ZoieIndexReader<R extends AtomicReader> extends BaseCompositeReader<ZoieSegmentReader<R>> implements UIDMapper,Cloneable
 {
-  private static final Logger log = Logger.getLogger(ZoieMultiReader.class.getName());
+  private static final Logger log = Logger.getLogger(ZoieIndexReader.class.getName());
 	private Map<String,ZoieSegmentReader<R>> _readerMap;
 	private ZoieSegmentReader<R>[] _subZoieReaders;
 	private List<R> _decoratedReaders;
@@ -44,7 +44,7 @@ public class ZoieMultiReader<R extends AtomicReader> extends BaseCompositeReader
 	private final DirectoryReader innerReader;
 	private final DocIDMapper docidMapper;
 	
-	public ZoieMultiReader(DirectoryReader innerReader,
+	public ZoieIndexReader(DirectoryReader innerReader,
 			ZoieSegmentReader<R>[] readers,IndexReaderDecorator<R> decorator,
 			DocIDMapper docidMapper,
 			boolean closeSubReaders)
@@ -173,7 +173,7 @@ public class ZoieMultiReader<R extends AtomicReader> extends BaseCompositeReader
 	  }
 	}
 	
-  public static <R extends AtomicReader> ZoieMultiReader<R> openIfChanged(ZoieMultiReader<R> reader) throws IOException{
+  public static <R extends AtomicReader> ZoieIndexReader<R> openIfChanged(ZoieIndexReader<R> reader) throws IOException{
       long version = reader.innerReader.getVersion();
       
       DirectoryReader inner = DirectoryReader.openIfChanged(reader.innerReader);
@@ -208,7 +208,7 @@ public class ZoieMultiReader<R extends AtomicReader> extends BaseCompositeReader
 		  }
 	  }
 	  
-	  ZoieMultiReader<R> ret = new ZoieMultiReader<R>(reader.innerReader,
+	  ZoieIndexReader<R> ret = new ZoieIndexReader<R>(reader.innerReader,
 			  subReaderList.toArray(new ZoieSegmentReader[subReaderList.size()]) ,
 			  reader._decorator, reader.docidMapper, reader.closeSubReaders);
 	  return ret;
@@ -222,7 +222,7 @@ public class ZoieMultiReader<R extends AtomicReader> extends BaseCompositeReader
    * @throws IOException
    */
   @Override
-  public ZoieMultiReader<R> clone()
+  public ZoieIndexReader<R> clone()
   {
     ZoieSegmentReader<R>[] sourceZoieSubReaders = this._subZoieReaders;
     ArrayList<ZoieSegmentReader<R>> zoieSubReaders = new ArrayList<ZoieSegmentReader<R>>(this._subZoieReaders.length);
@@ -231,7 +231,7 @@ public class ZoieMultiReader<R extends AtomicReader> extends BaseCompositeReader
       zoieSubReaders.add(r.clone());
     }
      
-    ZoieMultiReader<R> ret = new ZoieMultiReader<R>(this.innerReader,
+    ZoieIndexReader<R> ret = new ZoieIndexReader<R>(this.innerReader,
     		zoieSubReaders.toArray(new ZoieSegmentReader[zoieSubReaders.size()])
     		,_decorator, this.docidMapper, this.closeSubReaders);
     return ret;

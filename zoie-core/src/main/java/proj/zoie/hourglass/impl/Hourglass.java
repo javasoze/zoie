@@ -1,7 +1,7 @@
 package proj.zoie.hourglass.impl;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,6 +16,7 @@ import javax.management.StandardMBean;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.store.Directory;
@@ -26,7 +27,6 @@ import proj.zoie.api.DocIDMapper;
 import proj.zoie.api.Zoie;
 import proj.zoie.api.ZoieException;
 import proj.zoie.api.ZoieIndexReader;
-import proj.zoie.api.ZoieMultiReader;
 import proj.zoie.api.indexing.IndexReaderDecorator;
 import proj.zoie.api.indexing.ZoieIndexableInterpreter;
 import proj.zoie.hourglass.mbean.HourglassAdmin;
@@ -34,7 +34,7 @@ import proj.zoie.hourglass.mbean.HourglassAdminMBean;
 import proj.zoie.impl.indexing.ZoieConfig;
 import proj.zoie.impl.indexing.ZoieSystem;
 
-public class Hourglass<R extends IndexReader, D> implements Zoie<R, D>
+public class Hourglass<R extends AtomicReader, D> implements Zoie<R, D>
 {
   public static final Logger log = Logger.getLogger(Hourglass.class);
   private final HourglassDirectoryManagerFactory _dirMgrFactory;
@@ -130,7 +130,7 @@ public class Hourglass<R extends IndexReader, D> implements Zoie<R, D>
       try
       {
         reader = IndexReader.open(dir,true);
-        ZoieMultiReader<R> zoiereader = new ZoieMultiReader<R>(reader, _decorator);
+        ZoieIndexReader<R> zoiereader = new ZoieIndexReader<R>(reader, _decorator);
 
         // Initialize docIdMapper
         DocIDMapper<?> mapper = _zConfig.getDocidMapperFactory().getDocIDMapper(zoiereader);

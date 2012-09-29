@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 import proj.zoie.api.DocIDMapper;
 import proj.zoie.api.DocIDMapperFactory;
 import proj.zoie.api.ZoieIndexReader;
-import proj.zoie.api.ZoieMultiReader;
+import proj.zoie.api.ZoieIndexReader;
 import proj.zoie.api.ZoieSegmentReader;
 import proj.zoie.api.DocIDMapper.DocIDArray;
 
@@ -64,9 +64,9 @@ public class InRangeDocIDMapperFactory implements DocIDMapperFactory
    * Get the DocIDMapper for reader and assign the DocIDMapper for each
    * sub-reader (non-Javadoc)
    * 
-   * @see proj.zoie.api.DocIDMapperFactory#getDocIDMapper(proj.zoie.api.ZoieMultiReader)
+   * @see proj.zoie.api.DocIDMapperFactory#getDocIDMapper(proj.zoie.api.ZoieIndexReader)
    */
-  public DocIDMapper<DocIDArray> getDocIDMapper(ZoieMultiReader<?> reader)
+  public DocIDMapper<DocIDArray> getDocIDMapper(ZoieIndexReader<?> reader)
   {
     int docCount = reader.maxDoc();
     final ZoieSegmentReader[] subreaders = (ZoieSegmentReader[]) (reader

@@ -5,14 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReader;
 
 import proj.zoie.api.ZoieException;
 import proj.zoie.api.ZoieIndexReader;
 import proj.zoie.api.indexing.IndexReaderDecorator;
 import proj.zoie.impl.indexing.ZoieSystem;
 
-public class Box<R extends IndexReader, D>
+public class Box<R extends AtomicReader, D>
 {
   public static final Logger log = Logger.getLogger(Box.class.getName());
   List<ZoieIndexReader<R>> _archives;

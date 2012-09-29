@@ -18,6 +18,7 @@ package proj.zoie.impl.indexing.internal;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.store.Directory;
 
@@ -25,10 +26,9 @@ import proj.zoie.api.DirectoryManager;
 import proj.zoie.api.DocIDMapper;
 import proj.zoie.api.ZoieHealth;
 import proj.zoie.api.ZoieIndexReader;
-import proj.zoie.api.ZoieMultiReader;
 import proj.zoie.api.indexing.IndexReaderDecorator;
 
-public class IndexReaderDispenser<R extends IndexReader>
+public class IndexReaderDispenser<R extends AtomicReader>
 {
   private static final Logger log = Logger.getLogger(IndexReaderDispenser.class);
   
@@ -36,7 +36,7 @@ public class IndexReaderDispenser<R extends IndexReader>
   
 //  public static final String  INDEX_DIRECTORY = "index.directory";
   
-  static final class InternalIndexReader<R extends IndexReader> extends ZoieMultiReader<R>
+  static final class InternalIndexReader<R extends AtomicReader> extends ZoieIndexReader<R>
   {
     //private IndexSignature _sig;
     private final IndexReaderDispenser<R> _dispenser;
@@ -54,7 +54,7 @@ public class IndexReaderDispenser<R extends IndexReader>
     }
 
     @Override
-    protected ZoieMultiReader<R> newInstance(IndexReader inner, IndexReader[] subReaders) throws IOException
+    protected ZoieIndexReader<R> newInstance(IndexReader inner, IndexReader[] subReaders) throws IOException
     {
       return new InternalIndexReader<R>(inner,subReaders,_decorator,_dispenser);
     }

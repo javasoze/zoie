@@ -20,6 +20,7 @@ import javax.management.StandardMBean;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.IndexReader;
 
 import proj.zoie.api.DefaultDirectoryManager;
@@ -37,7 +38,7 @@ import proj.zoie.impl.indexing.ZoieSystem;
 import proj.zoie.impl.indexing.internal.IndexSignature;
 import proj.zoie.mbean.ZoieAdminMBean;
 
-public class Pair<R extends IndexReader, D> implements Zoie<R, D>
+public class Pair<R extends AtomicReader, D> implements Zoie<R, D>
 {
   public static final Logger log = Logger.getLogger(Pair.class);
 

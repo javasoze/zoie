@@ -5,13 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.IndexReader;
 
 import proj.zoie.api.IndexReaderFactory;
 import proj.zoie.api.ZoieException;
 import proj.zoie.api.ZoieIndexReader;
 
-public class NoopReaderCache<R extends IndexReader> extends AbstractReaderCache<R>
+public class NoopReaderCache<R extends AtomicReader> extends AbstractReaderCache<R>
 {
   private static final Logger log = Logger.getLogger(NoopReaderCache.class);
   private volatile boolean alreadyShutdown = false;

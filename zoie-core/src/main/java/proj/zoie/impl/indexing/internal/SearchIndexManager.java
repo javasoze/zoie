@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.IndexReader;
 
 import proj.zoie.api.DirectoryManager;
@@ -33,7 +34,7 @@ import proj.zoie.api.ZoieHealth;
 import proj.zoie.api.ZoieIndexReader;
 import proj.zoie.api.indexing.IndexReaderDecorator;
 
-public class SearchIndexManager<R extends IndexReader> implements IndexReaderFactory<ZoieIndexReader<R>>
+public class SearchIndexManager<R extends AtomicReader> implements IndexReaderFactory<ZoieIndexReader<R>>
 {
     private static final Logger log = Logger.getLogger(SearchIndexManager.class);
     
@@ -556,7 +557,7 @@ public class SearchIndexManager<R extends IndexReader> implements IndexReaderFac
     }
   }
 
-  private final static class Mem<R extends IndexReader>
+  private final static class Mem<R extends AtomicReader>
   {
     private final RAMSearchIndex<R> _memIndexA;
     private final RAMSearchIndex<R> _memIndexB;

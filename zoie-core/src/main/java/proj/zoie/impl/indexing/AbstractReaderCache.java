@@ -2,12 +2,12 @@ package proj.zoie.impl.indexing;
 
 import java.util.List;
 
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReader;
 
 import proj.zoie.api.ZoieException;
 import proj.zoie.api.ZoieIndexReader;
 
-public abstract class AbstractReaderCache<R extends IndexReader>
+public abstract class AbstractReaderCache<R extends AtomicReader>
 {
   public abstract List<ZoieIndexReader<R>> getIndexReaders();
 

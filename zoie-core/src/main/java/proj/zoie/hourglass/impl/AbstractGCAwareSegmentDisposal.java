@@ -4,7 +4,7 @@ import org.apache.lucene.index.IndexReader;
 
 import proj.zoie.api.Zoie;
 import proj.zoie.api.ZoieIndexReader;
-import proj.zoie.api.ZoieMultiReader;
+import proj.zoie.api.ZoieIndexReader;
 import proj.zoie.api.ZoieSegmentReader;
 import proj.zoie.hourglass.impl.HourGlassScheduler.FREQUENCY;
 
@@ -24,8 +24,8 @@ public abstract class AbstractGCAwareSegmentDisposal implements HourglassListene
 
   @Override
   public void onIndexReaderCleanUp(ZoieIndexReader<IndexReader> indexReader) {
-    if (indexReader instanceof ZoieMultiReader) {
-      ZoieSegmentReader[] segments = (ZoieSegmentReader[]) ((ZoieMultiReader) indexReader).getSequentialSubReaders();
+    if (indexReader instanceof ZoieIndexReader) {
+      ZoieSegmentReader[] segments = (ZoieSegmentReader[]) ((ZoieIndexReader) indexReader).getSequentialSubReaders();
       for (ZoieSegmentReader segmentReader : segments) {
         handleSegment(segmentReader);
       }

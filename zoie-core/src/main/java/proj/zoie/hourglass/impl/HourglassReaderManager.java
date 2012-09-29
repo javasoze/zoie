@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.store.Directory;
@@ -23,12 +24,11 @@ import proj.zoie.api.DirectoryManager;
 import proj.zoie.api.DocIDMapper;
 import proj.zoie.api.ZoieException;
 import proj.zoie.api.ZoieIndexReader;
-import proj.zoie.api.ZoieMultiReader;
 import proj.zoie.api.impl.util.FileUtil;
 import proj.zoie.api.indexing.IndexReaderDecorator;
 import proj.zoie.impl.indexing.ZoieSystem;
 
-public class HourglassReaderManager<R extends IndexReader, D>
+public class HourglassReaderManager<R extends AtomicReader, D>
 {
   public static final Logger log = Logger.getLogger(HourglassReaderManager.class.getName());
   private final HourglassDirectoryManagerFactory _dirMgrFactory;
@@ -355,7 +355,7 @@ public class HourglassReaderManager<R extends IndexReader, D>
    * @param zoie
    * @param reader the IndexReader opened on the index the give zoie had written to.
    */
-  public synchronized void archive(ZoieSystem<R, D> zoie, ZoieMultiReader<R> reader)
+  public synchronized void archive(ZoieSystem<R, D> zoie, ZoieIndexReader<R> reader)
   {
     List<ZoieIndexReader<R>> archives = new LinkedList<ZoieIndexReader<R>>(box._archives);
     List<ZoieSystem<R, D>> archiveZoies = new LinkedList<ZoieSystem<R, D>>(box._archiveZoies);
@@ -485,7 +485,7 @@ public class HourglassReaderManager<R extends IndexReader, D>
         }
       }
     }
-    ZoieMultiReader<R> zoiereader = null;
+    ZoieIndexReader<R> zoiereader = null;
 
     if (_appendOnly)
     {
@@ -502,7 +502,7 @@ public class HourglassReaderManager<R extends IndexReader, D>
       }
       try
       {
-        zoiereader = new ZoieMultiReader<R>(reader, _decorator);
+        zoiereader = new ZoieIndexReader<R>(reader, _decorator);
 
         // Initialize docIdMapper
         DocIDMapper<?> mapper = hg.getzConfig().getDocidMapperFactory().getDocIDMapper(zoiereader);

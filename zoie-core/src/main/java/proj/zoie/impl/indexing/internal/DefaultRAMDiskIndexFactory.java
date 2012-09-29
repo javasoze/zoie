@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.SimpleFSDirectory;
 
@@ -15,7 +15,7 @@ import proj.zoie.api.indexing.IndexReaderDecorator;
  * 
  * @param <R>
  */
-public class DefaultRAMDiskIndexFactory<R extends IndexReader> extends RAMIndexFactory<R>
+public class DefaultRAMDiskIndexFactory<R extends AtomicReader> extends RAMIndexFactory<R>
 {
   private static final Logger log = Logger.getLogger(DefaultRAMIndexFactory.class);
   private static int fold = 10000;

@@ -27,7 +27,7 @@ import java.util.Queue;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.search.similarities.Similarity;
 
@@ -39,7 +39,7 @@ import proj.zoie.api.indexing.OptimizeScheduler.OptimizeType;
 import proj.zoie.api.indexing.ZoieIndexable;
 import proj.zoie.impl.indexing.internal.SearchIndexManager.Status;
 
-public class DiskLuceneIndexDataLoader<R extends IndexReader> extends LuceneIndexDataLoader<R>
+public class DiskLuceneIndexDataLoader<R extends AtomicReader> extends LuceneIndexDataLoader<R>
 {
 
 	private long _lastTimeOptimized;

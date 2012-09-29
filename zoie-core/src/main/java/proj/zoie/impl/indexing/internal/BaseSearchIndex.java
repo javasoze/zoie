@@ -25,7 +25,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.MergeScheduler;
 import org.apache.lucene.search.ConstantScoreQuery;
@@ -36,7 +36,7 @@ import proj.zoie.api.ZoieHealth;
 import proj.zoie.api.ZoieIndexReader;
 import proj.zoie.api.indexing.ZoieIndexable.IndexingReq;
 
-public abstract class BaseSearchIndex<R extends IndexReader> {
+public abstract class BaseSearchIndex<R extends AtomicReader> {
 	  private static final Logger log = Logger.getLogger(BaseSearchIndex.class);
 	  
 	  private int _eventsHandled=0;

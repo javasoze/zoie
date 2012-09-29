@@ -1,7 +1,7 @@
 package proj.zoie.impl.indexing.internal;
 
 import org.apache.log4j.Logger;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.store.RAMDirectory;
 
 import proj.zoie.api.indexing.IndexReaderDecorator;
@@ -11,7 +11,7 @@ import proj.zoie.api.indexing.IndexReaderDecorator;
  * 
  * @param <R>
  */
-public class DefaultRAMIndexFactory<R extends IndexReader> extends RAMIndexFactory<R>
+public class DefaultRAMIndexFactory<R extends AtomicReader> extends RAMIndexFactory<R>
 {
   private static final Logger log = Logger.getLogger(DefaultRAMIndexFactory.class);
 

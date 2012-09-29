@@ -32,7 +32,7 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.search.ConstantScoreQuery;
 import org.apache.lucene.search.Filter;
@@ -47,7 +47,7 @@ import proj.zoie.api.indexing.IndexingEventListener;
 import proj.zoie.api.indexing.ZoieIndexable;
 import proj.zoie.api.indexing.ZoieIndexable.IndexingReq;
 
-public abstract class LuceneIndexDataLoader<R extends IndexReader> implements DataConsumer<ZoieIndexable>
+public abstract class LuceneIndexDataLoader<R extends AtomicReader> implements DataConsumer<ZoieIndexable>
 {
 	private static final Logger log = Logger.getLogger(LuceneIndexDataLoader.class);
 	protected final Analyzer _analyzer;

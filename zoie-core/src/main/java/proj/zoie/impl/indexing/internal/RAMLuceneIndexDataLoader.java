@@ -22,12 +22,12 @@ import java.util.Comparator;
 import java.util.Queue;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.search.similarities.Similarity;
 
 import proj.zoie.api.indexing.IndexingEventListener;
 
-public class RAMLuceneIndexDataLoader<R extends IndexReader> extends LuceneIndexDataLoader<R>
+public class RAMLuceneIndexDataLoader<R extends AtomicReader> extends LuceneIndexDataLoader<R>
 {
 
 	public RAMLuceneIndexDataLoader(Analyzer analyzer, Similarity similarity,SearchIndexManager<R> idxMgr,Comparator<String> comparator,Queue<IndexingEventListener> lsnrList)
