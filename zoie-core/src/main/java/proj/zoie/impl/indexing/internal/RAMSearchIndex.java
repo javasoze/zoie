@@ -49,7 +49,7 @@ public class RAMSearchIndex<R extends AtomicReader> extends BaseSearchIndex<R>
   private final Directory _directory;
   private final File _backingdir;
   private final IndexReaderDecorator<R> _decorator;
-
+  private static ThreadLocal<IndexWriterConfig> indexWriterConfigStorage = new ThreadLocal<IndexWriterConfig>();
   // a consistent pair of reader and deleted set
   private volatile ZoieIndexReader<R> _currentReader;
   private final MergePolicyParams _mergePolicyParams;
@@ -177,9 +177,15 @@ public class RAMSearchIndex<R extends AtomicReader> extends BaseSearchIndex<R>
     ZoieMergePolicy mergePolicy = new ZoieMergePolicy();
     mergePolicy.setMergePolicyParams(_mergePolicyParams);
     mergePolicy.setUseCompoundFile(false);
-
-    IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_34,analyzer);
+    
+    
+    IndexWriterConfig config = indexWriterConfigStorage.get();
+    if (config == null) {
+      config = new IndexWriterConfig(Version.LUCENE_34,analyzer);
+      indexWriterConfigStorage.set(config);
+    }
     config.setOpenMode(OpenMode.CREATE_OR_APPEND);
+   
     config.setMergeScheduler(_mergeScheduler);
     config.setMergePolicy(mergePolicy);
     

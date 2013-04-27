@@ -83,13 +83,19 @@ public abstract class BaseSearchIndex<R extends AtomicReader> {
 	  
       abstract public ZoieIndexReader<R> openIndexReader() throws IOException;
 	  
-      abstract public void refresh() throws IOException;
+    abstract public void refresh() throws IOException;
 
-      public void updateIndex(LongSet delDocs, List<IndexingReq> insertDocs,Analyzer defaultAnalyzer,Similarity similarity)
+    public void updateIndex(LongSet delDocs, List<IndexingReq> insertDocs,Analyzer defaultAnalyzer,Similarity similarity)
 	      throws IOException
 	  {
-	    deleteDocs(delDocs);
+      if (delDocs != null && delDocs.size() > 0) {
+        deleteDocs(delDocs);
+      }
 		
+	    if (insertDocs == null || insertDocs.size() == 0) {
+	      return;
+	    }
+
 	    IndexWriter idxMod = null;
 	    try
 	    {
@@ -148,7 +154,7 @@ public abstract class BaseSearchIndex<R extends AtomicReader> {
         reader.decZoieRef();
 	    }
 	  }
-	  
+
 	  public void commitDeletes() throws IOException
 	  {
         ZoieIndexReader<R> reader = null;
@@ -181,6 +187,13 @@ public abstract class BaseSearchIndex<R extends AtomicReader> {
 	  
 	  public void loadFromIndex(BaseSearchIndex<R> index) throws IOException
 	  {
+	     // yozhao: delete docs in disk index first
+      if (_delDocs != null && _delDocs.size() > 0) {
+        LongSet delDocs = _delDocs;
+        clearDeletes();
+        deleteDocs(delDocs);
+      }
+
 	    // hao: open readOnly ram index reader
 	    ZoieIndexReader<R> reader = index.openIndexReader();
 	    if(reader == null) return;
@@ -203,9 +216,9 @@ public abstract class BaseSearchIndex<R extends AtomicReader> {
 	      closeIndexWriter();
 	    }
 	  }
-	  
-	  
-	      
+
+
+
 	  abstract public IndexWriter openIndexWriter(Analyzer analyzer,Similarity similarity) throws IOException;
 	  
 	  public void closeIndexWriter()

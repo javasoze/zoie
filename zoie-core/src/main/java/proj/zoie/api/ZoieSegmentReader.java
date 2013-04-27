@@ -20,6 +20,13 @@ import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongSet;
 
 import java.io.IOException;
+<<<<<<< HEAD
+=======
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+>>>>>>> master
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -184,7 +191,16 @@ public class ZoieSegmentReader<R extends AtomicReader> extends FilterAtomicReade
 	public String getSegmentName(){
 		return ((SegmentReader)in).getSegmentName();
 	}
-	
+
+	@Override
+	protected synchronized void doClose() throws IOException {
+		_decoratedReader.close();
+	}
+
+	@Override
+	public void decRef() throws IOException {
+		// not synchronized, since it doesn't do anything anyway
+	}
    @Override
    public int numDocs() {
      if (_currentDelDocIds != null) {
@@ -216,4 +232,24 @@ public class ZoieSegmentReader<R extends AtomicReader> extends FilterAtomicReade
   public int getDocid(long uid) {
 	return _docIDMapper.getDocID(uid);
   }
+  private AtomicLong zoieRefSegmentCounter = new AtomicLong(1);
+  
+  public void incSegmentRef() {
+    zoieRefSegmentCounter.incrementAndGet();
+  }
+
+  public void decSegmentRef() {
+    long refCount = zoieRefSegmentCounter.decrementAndGet();
+    if (refCount < 0) {
+      throw new IllegalStateException("The segment ref count shouldn't be less than zero");
+    }
+    if (refCount == 0) {
+      try {
+        doClose();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+ 
 }

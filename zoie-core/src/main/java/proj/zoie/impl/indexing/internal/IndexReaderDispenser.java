@@ -38,25 +38,20 @@ public class IndexReaderDispenser<R extends AtomicReader>
   
   static final class InternalIndexReader<R extends AtomicReader> extends ZoieIndexReader<R>
   {
-    //private IndexSignature _sig;
-    private final IndexReaderDispenser<R> _dispenser;
-
-    InternalIndexReader(IndexReader in,IndexReaderDecorator<R> decorator,IndexReaderDispenser<R> dispenser) throws IOException
+    InternalIndexReader(IndexReader in,IndexReaderDecorator<R> decorator) throws IOException
     {
       super(in, decorator);
-      _dispenser = dispenser;
     }
-
-    public InternalIndexReader(IndexReader in, IndexReader[] subReaders, IndexReaderDecorator<R> decorator,IndexReaderDispenser<R> dispenser) throws IOException
+    
+    public InternalIndexReader(IndexReader in, IndexReader[] subReaders, IndexReaderDecorator<R> decorator) throws IOException
     {
       super(in, subReaders, decorator);
-      _dispenser = dispenser;
     }
 
     @Override
     protected ZoieIndexReader<R> newInstance(IndexReader inner, IndexReader[] subReaders) throws IOException
     {
-      return new InternalIndexReader<R>(inner,subReaders,_decorator,_dispenser);
+      return new InternalIndexReader<R>(inner,subReaders,_decorator);
     }
   }
 
@@ -68,7 +63,7 @@ public class IndexReaderDispenser<R extends AtomicReader>
   
   public IndexReaderDispenser(DirectoryManager dirMgr, IndexReaderDecorator<R> decorator,DiskSearchIndex<R> idx)
   {
-      _idx = idx;
+    _idx = idx;
     _dirMgr = dirMgr;
     _decorator = decorator;
     _currentSignature = null;
@@ -134,7 +129,7 @@ public class IndexReaderDispenser<R extends AtomicReader>
           
           try
           {
-            reader=new InternalIndexReader<R>(srcReader, decorator,this);
+            reader=new InternalIndexReader<R>(srcReader, decorator);
             _currentSignature = signature;
           }
           catch(IOException ioe)

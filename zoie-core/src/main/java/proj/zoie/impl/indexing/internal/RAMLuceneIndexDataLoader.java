@@ -43,6 +43,9 @@ public class RAMLuceneIndexDataLoader<R extends AtomicReader> extends LuceneInde
 	@Override
 	protected void propagateDeletes(LongSet delDocs) throws IOException
 	{
+	  if (delDocs == null || delDocs.size() == 0) {
+	    return;
+	  }
 	  RAMSearchIndex<R> readOnlyMemoryIdx = _idxMgr.getCurrentReadOnlyMemoryIndex();
 	  if(readOnlyMemoryIdx != null)
 	  {
