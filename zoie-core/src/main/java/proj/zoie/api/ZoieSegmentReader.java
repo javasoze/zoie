@@ -50,7 +50,7 @@ public class ZoieSegmentReader<R extends AtomicReader> extends FilterAtomicReade
 	long _maxUID;
 	protected boolean _noDedup = false;
 
-	private final DocIDMapper<?> _docIDMapper;
+	private final DocIDMapper _docIDMapper;
 	
 	public static void fillDocumentID(Document doc,long id){
 	  Field uidField = new NumericDocValuesField(AbstractZoieIndexable.DOCUMENT_ID_PAYLOAD_FIELD, id);
@@ -105,13 +105,17 @@ public class ZoieSegmentReader<R extends AtomicReader> extends FilterAtomicReade
     }
   }
   
-    public DocIDMapper<?> getDocIDMaper(){
+    public DocIDMapper getDocIDMaper(){
 		return _docIDMapper;
 	}
+    
+  public NumericDocValues getUidValues() {
+    return _uidValues;
+  }
 	
 	public void markDeletes(LongSet delDocs, LongSet deletedUIDs)
 	{
-      DocIDMapper<?> idMapper = getDocIDMaper();
+      DocIDMapper idMapper = getDocIDMaper();
       LongIterator iter = delDocs.iterator();
       IntRBTreeSet delDocIdSet = _delDocIdSet;
 
