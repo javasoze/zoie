@@ -20,21 +20,14 @@ import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongSet;
 
 import java.io.IOException;
-<<<<<<< HEAD
-=======
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
->>>>>>> master
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.LongDocValuesField;
+import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.index.AtomicReader;
-import org.apache.lucene.index.DocValues;
-import org.apache.lucene.index.DocValues.Source;
 import org.apache.lucene.index.FilterAtomicReader;
+import org.apache.lucene.index.NumericDocValues;
 import org.apache.lucene.index.SegmentReader;
 import org.apache.lucene.util.BytesRef;
 
@@ -43,8 +36,10 @@ import proj.zoie.api.indexing.AbstractZoieIndexable;
 import proj.zoie.api.indexing.IndexReaderDecorator;
 
 public class ZoieSegmentReader<R extends AtomicReader> extends FilterAtomicReader implements UIDMapper,Cloneable{
+	public static final long DELETED_UID = Long.MIN_VALUE;
+	
 	private R _decoratedReader;
-    private long[] _uidArray;
+    private NumericDocValues _uidValues;
     private IntRBTreeSet _delDocIdSet = new IntRBTreeSet();
     private int[] _currentDelDocIds;
 
@@ -58,7 +53,7 @@ public class ZoieSegmentReader<R extends AtomicReader> extends FilterAtomicReade
 	private final DocIDMapper<?> _docIDMapper;
 	
 	public static void fillDocumentID(Document doc,long id){
-	  Field uidField = new LongDocValuesField(AbstractZoieIndexable.DOCUMENT_ID_PAYLOAD_FIELD, id);
+	  Field uidField = new NumericDocValuesField(AbstractZoieIndexable.DOCUMENT_ID_PAYLOAD_FIELD, id);
 	  doc.add(uidField); 
 	}
 
@@ -93,7 +88,7 @@ public class ZoieSegmentReader<R extends AtomicReader> extends FilterAtomicReade
     // we are creating another wrapper around the same inner reader, need to up the ref
     in.incRef();
     _decorator = copyFrom._decorator;
-    _uidArray = copyFrom._uidArray;
+    _uidValues = copyFrom._uidValues;
     _maxUID = copyFrom._maxUID;
     _minUID = copyFrom._minUID;
     _noDedup = copyFrom._noDedup;
@@ -123,7 +118,7 @@ public class ZoieSegmentReader<R extends AtomicReader> extends FilterAtomicReade
       while(iter.hasNext())
       {
         long uid = iter.nextLong();
-        if (ZoieIndexReader.DELETED_UID != uid)
+        if (DELETED_UID != uid)
         {
           int docid = idMapper.getDocID(uid);
           if(docid != DocIDMapper.NOT_FOUND)
@@ -167,25 +162,18 @@ public class ZoieSegmentReader<R extends AtomicReader> extends FilterAtomicReade
 	
 	private void init(AtomicReader reader) throws IOException
 	{
-	  int maxDoc = reader.maxDoc();
-	  _uidArray = new long[maxDoc];
-	  
-	  DocValues docVals = reader.docValues(AbstractZoieIndexable.DOCUMENT_ID_PAYLOAD_FIELD);
-	  
-	  Source valSource = docVals.getSource();
-	  
-	  _uidArray = (long[])valSource.getArray();
+	  _uidValues = reader.getNumericDocValues(AbstractZoieIndexable.DOCUMENT_ID_PAYLOAD_FIELD);
 	}
 	
 	@Override
 	public long getUid(int docid)
 	{
-		return _uidArray[docid];
+	  return _uidValues.get(docid);
 	}
 
-	public long[] getUIDArray()
+	public NumericDocValues getUIDValues()
 	{
-		return _uidArray;
+		return _uidValues;
 	}
 	
 	public String getSegmentName(){
@@ -197,10 +185,6 @@ public class ZoieSegmentReader<R extends AtomicReader> extends FilterAtomicReade
 		_decoratedReader.close();
 	}
 
-	@Override
-	public void decRef() throws IOException {
-		// not synchronized, since it doesn't do anything anyway
-	}
    @Override
    public int numDocs() {
      if (_currentDelDocIds != null) {
@@ -230,8 +214,9 @@ public class ZoieSegmentReader<R extends AtomicReader> extends FilterAtomicReade
 
   @Override
   public int getDocid(long uid) {
-	return _docIDMapper.getDocID(uid);
+	  return _docIDMapper.getDocID(uid);
   }
+  
   private AtomicLong zoieRefSegmentCounter = new AtomicLong(1);
   
   public void incSegmentRef() {

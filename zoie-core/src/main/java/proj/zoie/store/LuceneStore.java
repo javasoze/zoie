@@ -11,6 +11,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.DocsAndPositionsEnum;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -22,6 +23,7 @@ import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.Version;
 
@@ -170,7 +172,7 @@ public class LuceneStore extends AbstractZoieStore {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
+			public DocIdSet getDocIdSet(AtomicReaderContext readerCtx, Bits acceptedDocs) throws IOException {
 				return new DocIdSet(){
 
 					@Override
@@ -241,7 +243,8 @@ public class LuceneStore extends AbstractZoieStore {
 	protected void commitVersion(String version) throws IOException {
 		HashMap<String,String> versionMap = new HashMap<String,String>();
         versionMap.put(VERSION_NAME, version);
-        _idxWriter.commit(versionMap);
+        _idxWriter.setCommitData(versionMap);
+        _idxWriter.commit();
         updateReader();
 	}
 

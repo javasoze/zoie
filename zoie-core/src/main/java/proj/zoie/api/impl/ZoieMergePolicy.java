@@ -369,7 +369,7 @@ public class ZoieMergePolicy extends LogByteSizeMergePolicy
    *  when the total size reaches the average size of large segments.
    */
   @Override
-  public MergeSpecification findMerges(SegmentInfos infos) throws IOException
+  public MergeSpecification findMerges(MergeTrigger mergeTrigger, SegmentInfos infos) throws IOException
   {
     final int numSegs = infos.size();
     final int numLargeSegs = _numLargeSegments;
@@ -432,7 +432,7 @@ public class ZoieMergePolicy extends LogByteSizeMergePolicy
       List<SegmentInfoPerCommit> smallSegmentList = infos.asList().subList(numLargeSegs, numSegs);
       SegmentInfos smallSegments = new SegmentInfos();
       smallSegments.addAll(smallSegmentList);
-      MergeSpecification spec = super.findMerges(smallSegments);
+      MergeSpecification spec = super.findMerges(mergeTrigger, smallSegments);
 
       if(_partialExpunge)
       {
