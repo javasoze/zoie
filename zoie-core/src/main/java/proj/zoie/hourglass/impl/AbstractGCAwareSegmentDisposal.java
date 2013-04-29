@@ -1,12 +1,11 @@
 package proj.zoie.hourglass.impl;
 
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.NumericDocValues;
 
 import proj.zoie.api.Zoie;
 import proj.zoie.api.ZoieIndexReader;
-import proj.zoie.api.ZoieIndexReader;
 import proj.zoie.api.ZoieSegmentReader;
-import proj.zoie.hourglass.impl.HourGlassScheduler.FREQUENCY;
 
 public abstract class AbstractGCAwareSegmentDisposal implements HourglassListener<IndexReader, IndexReader>{
   
@@ -37,9 +36,9 @@ public abstract class AbstractGCAwareSegmentDisposal implements HourglassListene
     
   }
   private void handleSegment(ZoieSegmentReader segmentReader) {    
-    onDelete(segmentReader, segmentReader.getUIDArray());      
+    onDelete(segmentReader, segmentReader.getUidValues());      
   }
 
-  public abstract void onDelete(ZoieSegmentReader segmentReader, long[] uidArray) ;
+  public abstract void onDelete(ZoieSegmentReader segmentReader, NumericDocValues uidValues) ;
   public abstract void shutdown();
 }

@@ -17,6 +17,7 @@ import org.apache.lucene.util.Version;
 import proj.zoie.api.DocIDMapper;
 import proj.zoie.api.Zoie;
 import proj.zoie.api.ZoieIndexReader;
+import proj.zoie.api.ZoieSegmentReader;
 
 public class SearchUtil
 {
@@ -34,7 +35,7 @@ public class SearchUtil
     List<ZoieIndexReader<?>> readers = null;
     IndexSearcher searcher = null;
     QueryParser parser = null;
-    parser = new QueryParser(Version.LUCENE_40, field, zoie.getAnalyzer());
+    parser = new QueryParser(Version.LUCENE_42, field, zoie.getAnalyzer());
     parser.setAllowLeadingWildcard(true);
     Query q = null;
     try
@@ -58,6 +59,7 @@ public class SearchUtil
         retstr += "reader: " + readerid + "\n";
         docstr += "reader: " + readerid + "\n";
         ZoieIndexReader reader = readers.get(readerid);
+        
         DocIDMapper idmapper = reader.getDocIDMaper();
         
         
@@ -112,7 +114,7 @@ public class SearchUtil
           retstr += "not found in this reader\n";
           continue;
         }
-        if (docid==ZoieIndexReader.DELETED_UID || !reader.getLiveDocs().get(docid))
+        if (docid==ZoieSegmentReader.DELETED_UID || !reader.getLiveDocs().get(docid))
         {
           retstr += "deleted\n";
         }

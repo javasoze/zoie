@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.BaseCompositeReader;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.SegmentReader;
@@ -120,10 +121,9 @@ public class ZoieIndexReader<R extends AtomicReader> extends BaseCompositeReader
 	
 	public void markDeletes(LongSet delDocs, LongSet deletedUIDs)
 	{
-	    for(ZoieSegmentReader<R> subReader : _subZoieReaders)
-	    {
-	      subReader.markDeletes(delDocs, deletedUIDs);
-        } 
+	  for(ZoieSegmentReader<R> subReader : _subZoieReaders) {
+	    subReader.markDeletes(delDocs, deletedUIDs);
+    } 
 	}
 	
 	public void commitDeletes()
@@ -181,10 +181,11 @@ public class ZoieIndexReader<R extends AtomicReader> extends BaseCompositeReader
 	    return reader;
 	  }
 	  
-	  List<AtomicReader> subReaders = (List<AtomicReader>)inner.getSequentialSubReaders();
+	  List<AtomicReaderContext> subReaderCtx = inner.leaves();
 	  
-	  ArrayList<ZoieSegmentReader<R>> subReaderList = new ArrayList<ZoieSegmentReader<R>>(subReaders.size());
-	  for (AtomicReader subReader : subReaders){
+	  ArrayList<ZoieSegmentReader<R>> subReaderList = new ArrayList<ZoieSegmentReader<R>>(subReaderCtx.size());
+	  for (AtomicReaderContext ctx : subReaderCtx){
+	    AtomicReader subReader = ctx.reader();
 		  if (subReader instanceof SegmentReader){
 			  SegmentReader sr = (SegmentReader)subReader;
 			  String segmentName = sr.getSegmentName();

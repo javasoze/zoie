@@ -1,19 +1,23 @@
 package proj.zoie.hourglass.impl;
 
+import java.io.IOException;
+
+import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.CompositeReader;
+
 import proj.zoie.api.DocIDMapper;
 import proj.zoie.api.DocIDMapperFactory;
-import proj.zoie.api.ZoieIndexReader;
-import proj.zoie.api.ZoieIndexReader;
 
 public class NullDocIDMapperFactory implements DocIDMapperFactory
 {
   public static final NullDocIDMapperFactory INSTANCE = new NullDocIDMapperFactory();
-  public DocIDMapper<Object> getDocIDMapper(ZoieIndexReader<?> reader)
-  {
-    for(ZoieIndexReader<?>r : reader.getSequentialSubReaders())
-    {
-      r.setDocIDMapper(NullDocIDMapper.INSTANCE);
-    }
+  
+  @Override
+  public DocIDMapper getDocIDMapper(AtomicReader reader) throws IOException {
+    return NullDocIDMapper.INSTANCE;
+  }
+  @Override
+  public DocIDMapper getDocIDMapper(CompositeReader reader) throws IOException {
     return NullDocIDMapper.INSTANCE;
   }  
 }

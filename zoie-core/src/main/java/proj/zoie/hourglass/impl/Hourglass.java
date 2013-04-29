@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.CorruptIndexException;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.store.Directory;
 
@@ -130,14 +131,14 @@ public class Hourglass<R extends AtomicReader, D> implements Zoie<R, D>
     List<Directory> dirs = _dirMgrFactory.getAllArchivedDirectories();
     for(Directory dir : dirs)
     {
-      IndexReader reader;
+      DirectoryReader reader;
       try
       {
-        reader = IndexReader.open(dir,true);
+        reader = DirectoryReader.open(dir);
         ZoieIndexReader<R> zoiereader = new ZoieIndexReader<R>(reader, _decorator);
 
         // Initialize docIdMapper
-        DocIDMapper<?> mapper = _zConfig.getDocidMapperFactory().getDocIDMapper(zoiereader);
+        DocIDMapper mapper = _zConfig.getDocidMapperFactory().getDocIDMapper(zoiereader);
         zoiereader.setDocIDMapper(mapper);
 
         archives.add(zoiereader);
@@ -208,7 +209,7 @@ public class Hourglass<R extends AtomicReader, D> implements Zoie<R, D>
         List<ZoieIndexReader<R>> rlist = list;
         for(ZoieIndexReader<R> r : rlist)
         {
-          r.incZoieRef();
+          r.incRef();
         }
         t0 = System.currentTimeMillis() - t0;
         if (t0 > SLA)

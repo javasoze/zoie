@@ -49,7 +49,7 @@ public class Box<R extends AtomicReader, D>
   {
     for (ZoieIndexReader<R> r : _archives)
     {
-      r.decZoieRef();
+      r.decRef();
       log.info("refCount at shutdown: " + r.getRefCount() + " " + r.directory());
     }
     for (ZoieSystem<R, D> zoie : _archiveZoies)

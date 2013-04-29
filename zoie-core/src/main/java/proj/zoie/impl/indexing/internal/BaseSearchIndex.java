@@ -81,7 +81,7 @@ public abstract class BaseSearchIndex<R extends AtomicReader> {
 	    closeIndexWriter();
 	  }
 	  
-      abstract public ZoieIndexReader<R> openIndexReader() throws IOException;
+    abstract public ZoieIndexReader<R> openIndexReader() throws IOException;
 	  
     abstract public void refresh() throws IOException;
 
@@ -148,10 +148,10 @@ public abstract class BaseSearchIndex<R extends AtomicReader> {
           reader = openIndexReader();
           if(reader == null)
             return;
-          reader.incZoieRef();
+          reader.incRef();
           reader.markDeletes(delDocs, _delDocs);
+          reader.decRef();
         }
-        reader.decZoieRef();
 	    }
 	  }
 
@@ -163,10 +163,11 @@ public abstract class BaseSearchIndex<R extends AtomicReader> {
           reader = openIndexReader();
           if(reader == null)
             return;
-          reader.incZoieRef();
+          reader.incRef();
+          reader.commitDeletes();
+          reader.decRef();
         }
-        reader.commitDeletes();
-        reader.decZoieRef();
+        
 	  }
 	  
 	  private void deleteDocs(LongSet delDocs) throws IOException

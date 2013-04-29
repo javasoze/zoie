@@ -26,6 +26,7 @@ import java.util.concurrent.TimeoutException;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -142,16 +143,16 @@ public class RAMSearchIndex<R extends AtomicReader> extends BaseSearchIndex<R>
   
   private ZoieIndexReader<R> openIndexReaderInternal() throws IOException
   {
-    if (IndexReader.indexExists(_directory))
+    if (DirectoryReader.indexExists(_directory))
     {
-      IndexReader srcReader = null;
+      DirectoryReader srcReader = null;
       ZoieIndexReader<R> finalReader = null;
       try
       {
         // for RAM indexes, just get a new index reader
-        srcReader = IndexReader.open(_directory, true);
+        srcReader = DirectoryReader.open(_directory);
         finalReader = ZoieIndexReader.open(srcReader, _decorator);
-        DocIDMapper<?> mapper = _idxMgr._docIDMapperFactory.getDocIDMapper((ZoieIndexReader<R>) finalReader);
+        DocIDMapper mapper = _idxMgr._docIDMapperFactory.getDocIDMapper((ZoieIndexReader<R>) finalReader);
         finalReader.setDocIDMapper(mapper);
         return finalReader;
       } catch (IOException ioe)
@@ -240,7 +241,7 @@ public class RAMSearchIndex<R extends AtomicReader> extends BaseSearchIndex<R>
         reader = (ZoieIndexReader<R>) _currentReader.reopen(true);
         if (reader != _currentReader)
         {
-          DocIDMapper<?> mapper = _idxMgr._docIDMapperFactory.getDocIDMapper((ZoieIndexReader<R>) reader);
+          DocIDMapper mapper = _idxMgr._docIDMapperFactory.getDocIDMapper((ZoieIndexReader<R>) reader);
           reader.setDocIDMapper(mapper);
         }
       }
