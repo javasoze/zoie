@@ -25,26 +25,28 @@ import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.Bits;
 
+import proj.zoie.api.impl.DefaultDocIDMapperFactory;
+
 /**
  * Filter implementation based on a list of uids
  */
 public class UIDFilter extends Filter {
 	private final long[] _filteredIDs;
+	private final DocIDMapperFactory _docIdMapperFactory;
 
-	public UIDFilter(long[] filteredIDs) {
+	public UIDFilter(long[] filteredIDs, DocIDMapperFactory docIdMapperFactory) {
 		_filteredIDs = filteredIDs;
+		_docIdMapperFactory = docIdMapperFactory;
 	}
+	
+	public UIDFilter(long[] filteredIDs) {
+    this(filteredIDs, new DefaultDocIDMapperFactory());
+  }
 
 	@Override
 	public DocIdSet getDocIdSet(AtomicReaderContext ctx,Bits bits) throws IOException {
 		AtomicReader reader = ctx.reader();
-		if (reader instanceof ZoieSegmentReader<?>) {
-			return new UIDDocIdSet(_filteredIDs, ((ZoieSegmentReader<?>)reader).getDocIDMaper());
-		}
-		else {
-			throw new IllegalArgumentException(
-			"UIDFilter may only load from "+ZoieSegmentReader.class+" instances");
-		}
+		return new UIDDocIdSet(_filteredIDs, _docIdMapperFactory.getDocIDMapper(reader));
 	}
 	
 	/**

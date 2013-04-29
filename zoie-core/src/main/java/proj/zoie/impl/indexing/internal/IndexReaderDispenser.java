@@ -210,7 +210,7 @@ public class IndexReaderDispenser<R extends AtomicReader>
     if (_currentReader != reader)
     {
       if (reader!=null){
-        DocIDMapper<?> mapper = _idx._idxMgr._docIDMapperFactory.getDocIDMapper(reader);
+        DocIDMapper mapper = _idx._idxMgr._docIDMapperFactory.getDocIDMapper(reader);
         reader.setDocIDMapper(mapper);
       }
       // assume that this is the only place that _currentReader gets refreshed 
