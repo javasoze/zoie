@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.DirectoryReader;
@@ -182,6 +183,12 @@ public class IndexMigration {
 	  // verify
 	  boolean verified = openZoieReader(output);
 	  System.out.println("verified: " + verified);
+	  
+	  System.out.println("copy directory file");
+	// copy index.directory
+    File indexDirectorySource = new File(srcIdx, "index.directory");
+    File indexDirectoryDestination = new File(output, "index.directory");    
+    FileUtils.copyFile(indexDirectorySource, indexDirectoryDestination);
 	}
 
 }
